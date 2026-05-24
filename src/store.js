@@ -117,11 +117,12 @@ const store = {
     return Object.values(load());
   },
 
-  approve(token) {
+  approve(token, offerLetterDate = "") {
     const all = load();
     if (all[token]) {
       all[token].status = "approved";
       all[token].approvedAt = new Date().toISOString();
+      all[token].offerLetterDate = offerLetterDate || new Date().toLocaleDateString("en-IN");
       all[token].rejectionReason = "";
     }
     save(all);
@@ -285,6 +286,24 @@ const store = {
 
   clear() {
     localStorage.removeItem(LS_KEY);
+  },
+
+  resetToPending(token) {
+    const all = load();
+    if (all[token]) {
+      all[token].status = "pending";
+      all[token].approvedAt = null;
+      all[token].offerLetterDate = "";
+      all[token].rejectedAt = null;
+      all[token].rejectionReason = "";
+    }
+    save(all);
+  },
+
+  deleteRecord(token) {
+    const all = load();
+    delete all[token];
+    save(all);
   },
 };
 

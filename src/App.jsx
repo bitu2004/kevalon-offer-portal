@@ -6,6 +6,7 @@ import DownloadSection from "./pages/DownloadSection";
 import TrackStatus from "./pages/TrackStatus";
 import AdminPanel from "./pages/AdminPanel";
 import VerifyPage from "./pages/VerifyPage";
+import ContactPage from "./pages/ContactPage";
 
 export default function App() {
   const [page, setPage] = useState(() => {
@@ -31,6 +32,7 @@ export default function App() {
         {page === "track"    && <TrackStatus onNavigate={setPage} />}
         {page === "download" && <DownloadSection onNavigate={setPage} />}
         {page === "verify"   && <VerifyPage />}
+        {page === "contact"  && <ContactPage />}
       </div>
     </div>
   );

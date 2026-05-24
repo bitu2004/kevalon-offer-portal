@@ -258,8 +258,29 @@ export default function WelcomePage({ onNavigate }) {
           </div>
           <span style={{ color: "#fff", fontWeight: 600, fontSize: 14 }}>Kevalon Technology</span>
         </div>
-        <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 12 }}>
-          © 2026 Kevalon Technology. All rights reserved. &nbsp;|&nbsp; internship@kevalon.com &nbsp;|&nbsp; www.kevalontechnology.in
+        <div style={{ display: "flex", justifyContent: "center", gap: 20, marginBottom: 12, flexWrap: "wrap" }}>
+          {[
+            { label: "📞 +91 90810 12218", href: "tel:+919081012218" },
+            { label: "✉️ ceo@kevalontechnology.in", href: "mailto:ceo@kevalontechnology.in" },
+            { label: "🌐 kevalontechnology.in", href: "https://www.kevalontechnology.in" },
+          ].map(l => (
+            <a key={l.label} href={l.href} target="_blank" rel="noreferrer"
+              style={{ color: "rgba(255,255,255,0.55)", fontSize: 12, textDecoration: "none" }}
+              onMouseEnter={e => { e.currentTarget.style.color = "#38bdf8"; }}
+              onMouseLeave={e => { e.currentTarget.style.color = "rgba(255,255,255,0.55)"; }}
+            >
+              {l.label}
+            </a>
+          ))}
+        </div>
+        <button
+          onClick={() => onNavigate("contact")}
+          style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 8, padding: "6px 18px", color: "rgba(255,255,255,0.5)", fontSize: 12, cursor: "pointer", marginBottom: 12 }}
+        >
+          Contact Us
+        </button>
+        <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, margin: 0 }}>
+          © 2026 Kevalon Technology. All rights reserved.
         </p>
       </footer>
     </div>

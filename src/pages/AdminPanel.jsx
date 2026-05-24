@@ -12,14 +12,25 @@ export default function AdminPanel({ onNavigate }) {
   const [pwdErr, setPwdErr] = useState("");
   const [requests, setRequests] = useState([]);
   const [filter, setFilter] = useState("all");
-  const [selected, setSelected] = useState(null);
   const [tab, setTab] = useState("requests");
   const [selectedTokens, setSelectedTokens] = useState([]);
   const [bulkAction, setBulkAction] = useState("");
-  const [rejectReason, setRejectReason] = useState("");
-  const [rejectTarget, setRejectTarget] = useState(null);
   const [analytics, setAnalytics] = useState(null);
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("kvl_dark") === "1");
+
+  // View modal
+  const [viewRecord, setViewRecord] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [editFields, setEditFields] = useState({});
+
+  // Approve flow: step 1 = show date picker, step 2 = confirm
+  const [approveTarget, setApproveTarget] = useState(null); // token
+  const [offerLetterDate, setOfferLetterDate] = useState("");
+  const [approveStep, setApproveStep] = useState(1); // 1=initial view, 2=date picker shown
+
+  // Reject modal
+  const [rejectTarget, setRejectTarget] = useState(null);
+  const [rejectReason, setRejectReason] = useState("");
 
   const refresh = () => {
     setRequests([...store.getAll()].reverse());
@@ -31,13 +42,78 @@ export default function AdminPanel({ onNavigate }) {
     else setPwdErr("Incorrect password. Please try again.");
   };
 
-  const approve = (token) => { store.approve(token); refresh(); setSelected(null); };
+  // Open view modal
+  const openView = (req) => {
+    setViewRecord(req);
+    setApproveTarget(null);
+    setApproveStep(1);
+    setOfferLetterDate("");
+    setEditMode(false);
+    setEditFields({});
+  };
+  const closeView = () => {
+    setViewRecord(null);
+    setApproveTarget(null);
+    setApproveStep(1);
+    setEditMode(false);
+    setEditFields({});
+  };
 
+  // Edit mode
+  const startEdit = () => {
+    setEditFields({ ...viewRecord });
+    setEditMode(true);
+  };
+  const saveEdit = () => {
+    const all = store.requests;
+    const token = viewRecord.token;
+    if (all[token]) {
+      // Use store update for pending, or force-update for admin
+      const updated = { ...all[token], ...editFields };
+      const ls = JSON.parse(localStorage.getItem("kvl_requests") || "{}");
+      ls[token] = updated;
+      localStorage.setItem("kvl_requests", JSON.stringify(ls));
+    }
+    refresh();
+    const updated = store.get(viewRecord.token);
+    setViewRecord(updated);
+    setEditMode(false);
+  };
+
+  // Reset to pending
+  const resetToPending = (token) => {
+    store.resetToPending(token);
+    refresh();
+    setViewRecord(store.get(token));
+    setApproveTarget(null);
+    setApproveStep(1);
+  };
+
+  // Approve flow: click Approve → show date picker → Confirm Approval → done
+  const startApprove = (token) => {
+    setApproveTarget(token);
+    setApproveStep(2);
+    setOfferLetterDate(new Date().toISOString().split("T")[0]);
+  };
+  const confirmApprove = () => {
+    store.approve(approveTarget, offerLetterDate);
+    refresh();
+    closeView();
+  };
+
+  // Reject
   const openReject = (token) => { setRejectTarget(token); setRejectReason(""); };
   const confirmReject = () => {
     if (!rejectReason.trim()) return;
     store.reject(rejectTarget, rejectReason);
-    refresh(); setSelected(null); setRejectTarget(null); setRejectReason("");
+    refresh(); closeView(); setRejectTarget(null); setRejectReason("");
+  };
+
+  // Delete
+  const deleteRecord = (token) => {
+    if (!window.confirm("Delete this application permanently?")) return;
+    store.deleteRecord(token);
+    refresh(); closeView();
   };
 
   const approveCert = (token) => { store.approveCertificate(token); refresh(); };
@@ -268,7 +344,7 @@ export default function AdminPanel({ onNavigate }) {
                 <p style={{ color: sub, fontSize: 14 }}>Submit a request from the portal to see it here.</p>
               </div>
             ) : filtered.map(req => (
-              <div key={req.token} style={{ background: card, borderRadius: 14, padding: "18px 20px", border: `1px solid ${selectedTokens.includes(req.token) ? "#1a56db" : border}`, marginBottom: 10, boxShadow: "0 2px 10px rgba(0,0,0,0.04)", transition: "all 0.2s" }}
+              <div key={req.token} style={{ background: card, borderRadius: 14, padding: "16px 20px", border: `1px solid ${selectedTokens.includes(req.token) ? "#1a56db" : border}`, marginBottom: 10, boxShadow: "0 2px 10px rgba(0,0,0,0.04)", transition: "all 0.2s" }}
                 onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 6px 24px rgba(0,0,0,0.08)"; }}
                 onMouseLeave={e => { e.currentTarget.style.boxShadow = "0 2px 10px rgba(0,0,0,0.04)"; }}
               >
@@ -277,97 +353,261 @@ export default function AdminPanel({ onNavigate }) {
                     {req.status === "pending" && (
                       <input type="checkbox" checked={selectedTokens.includes(req.token)} onChange={() => toggleSelect(req.token)} style={{ width: 16, height: 16, accentColor: "#1a56db", cursor: "pointer" }} />
                     )}
-                    <div style={{ width: 42, height: 42, borderRadius: 11, background: "linear-gradient(135deg,#eff6ff,#dbeafe)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>👤</div>
+                    <div style={{ width: 42, height: 42, borderRadius: 11, background: "linear-gradient(135deg,#eff6ff,#dbeafe)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>👤</div>
                     <div>
                       <div style={{ fontWeight: 700, fontSize: 14, color: text }}>{req.fullName}</div>
-                      <div style={{ fontSize: 11, color: sub, marginTop: 1 }}>{req.email} · {req.collegeName}</div>
-                      <div style={{ display: "flex", gap: 6, marginTop: 3, flexWrap: "wrap" }}>
-                        <span style={{ fontSize: 10, fontFamily: "monospace", color: "#1a56db", fontWeight: 700, letterSpacing: 1 }}>{req.token}</span>
-                        <span style={{ fontSize: 10, color: sub }}>·</span>
-                        <span style={{ fontSize: 10, color: sub }}>{req.letterId}</span>
-                        {req.duration && <><span style={{ fontSize: 10, color: sub }}>·</span><span style={{ fontSize: 10, color: "#065f46", fontWeight: 600 }}>⏱ {req.duration}</span></>}
+                      <div style={{ fontSize: 11, color: sub, marginTop: 1 }}>{req.email}</div>
+                      <div style={{ display: "flex", gap: 6, marginTop: 3, flexWrap: "wrap", alignItems: "center" }}>
+                        <Badge status={req.status} />
+                        {req.certStatus === "pending" && <span style={{ fontSize: 10, background: "#ede9fe", color: "#7c3aed", borderRadius: 6, padding: "2px 7px", fontWeight: 700 }}>🎓 Cert Pending</span>}
+                        {req.certStatus === "approved" && <span style={{ fontSize: 10, background: "#d1fae5", color: "#065f46", borderRadius: 6, padding: "2px 7px", fontWeight: 700 }}>🏆 Cert Issued</span>}
                       </div>
                     </div>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                    <Badge status={req.status} />
-                    {req.status === "pending" && (
-                      <>
-                        <button onClick={() => approve(req.token)} style={{ padding: "6px 14px", borderRadius: 8, background: "linear-gradient(135deg,#065f46,#10b981)", border: "none", color: "#fff", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>✓ Approve</button>
-                        <button onClick={() => openReject(req.token)} style={{ padding: "6px 14px", borderRadius: 8, background: "linear-gradient(135deg,#991b1b,#ef4444)", border: "none", color: "#fff", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>✕ Reject</button>
-                      </>
-                    )}
-                    {/* Certificate actions — shown when cert is pending */}
-                    {req.certStatus === "pending" && (
-                      <>
-                        <button onClick={() => approveCert(req.token)} style={{ padding: "6px 14px", borderRadius: 8, background: "linear-gradient(135deg,#7c3aed,#a855f7)", border: "none", color: "#fff", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>🏆 Cert ✓</button>
-                        <button onClick={() => openRejectCert(req.token)} style={{ padding: "6px 14px", borderRadius: 8, background: "linear-gradient(135deg,#991b1b,#ef4444)", border: "none", color: "#fff", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>🏆 Cert ✕</button>
-                      </>
-                    )}
-                    {req.certStatus === "approved" && (
-                      <span style={{ fontSize: 11, color: "#065f46", background: "#d1fae5", borderRadius: 6, padding: "3px 8px", fontWeight: 600 }}>🏆 Cert Issued</span>
-                    )}
-                    {req.status === "rejected" && req.rejectionReason && (
-                      <span style={{ fontSize: 11, color: "#991b1b", background: "#fee2e2", borderRadius: 6, padding: "3px 8px", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={req.rejectionReason}>
-                        Reason: {req.rejectionReason}
-                      </span>
-                    )}
-                    <button onClick={() => setSelected(selected?.token === req.token ? null : req)} style={{ padding: "6px 12px", borderRadius: 8, background: "#f8fafc", border: `1px solid ${border}`, fontSize: 11, cursor: "pointer", color: sub, fontWeight: 500 }}>
-                      {selected?.token === req.token ? "▲ Hide" : "▼ View"}
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 11, color: sub }}>{fmtDate(req.submittedAt)}</span>
+                    <button
+                      onClick={() => openView(req)}
+                      style={{ padding: "7px 18px", borderRadius: 8, background: "linear-gradient(135deg,#1a56db,#0ea5e9)", border: "none", color: "#fff", fontSize: 13, cursor: "pointer", fontWeight: 600 }}
+                    >
+                      View
                     </button>
                   </div>
                 </div>
-
-                {selected?.token === req.token && (
-                  <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${border}`, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "10px 20px" }}>
-                    {[
-                      ["Phone", req.phone], ["Branch", req.branch], ["Semester", req.semester],
-                      ["Technology", req.technology], ["Gender", req.gender], ["Enrollment No.", req.enrollmentNumber],
-                      ["Start Date", fmtDate(req.startDate)], ["End Date", fmtDate(req.endDate)],
-                      ["Applied On", fmtDate(req.submittedAt)], ["Downloads", req.downloadCount || 0],
-                    ].map(([k, v]) => (
-                      <div key={k}>
-                        <div style={{ fontSize: 10, color: sub, textTransform: "uppercase", letterSpacing: 0.8, fontWeight: 600 }}>{k}</div>
-                        <div style={{ fontSize: 12, fontWeight: 600, color: text, marginTop: 2 }}>{v}</div>
-                      </div>
-                    ))}
-                    {/* Notify buttons */}
-                    <div style={{ gridColumn: "1 / -1", display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
-                      <div style={{ fontSize: 11, color: sub, fontWeight: 600, width: "100%", marginBottom: 4 }}>📣 Notify User:</div>
-                      {req.status === "approved" && (
-                        <>
-                          <a href={whatsappLink(req.phone, msgApproved(req.fullName, req.token))} target="_blank" rel="noreferrer"
-                            style={{ padding: "6px 14px", borderRadius: 8, background: "#25D366", color: "#fff", fontSize: 12, fontWeight: 600, textDecoration: "none", display: "flex", alignItems: "center", gap: 5 }}>
-                            💬 WhatsApp Approved
-                          </a>
-                          <a href={mailtoLink(req.email, ...Object.values(emailApproved(req.fullName, req.token)))} target="_blank" rel="noreferrer"
-                            style={{ padding: "6px 14px", borderRadius: 8, background: "#ea4335", color: "#fff", fontSize: 12, fontWeight: 600, textDecoration: "none", display: "flex", alignItems: "center", gap: 5 }}>
-                            ✉️ Email Approved
-                          </a>
-                        </>
-                      )}
-                      {req.status === "rejected" && (
-                        <a href={whatsappLink(req.phone, msgRejected(req.fullName, req.token, req.rejectionReason))} target="_blank" rel="noreferrer"
-                          style={{ padding: "6px 14px", borderRadius: 8, background: "#64748b", color: "#fff", fontSize: 12, fontWeight: 600, textDecoration: "none", display: "flex", alignItems: "center", gap: 5 }}>
-                          💬 WhatsApp Rejected
-                        </a>
-                      )}
-                      {req.certStatus === "approved" && (
-                        <a href={whatsappLink(req.phone, msgCertApproved(req.fullName, req.token, req.certId))} target="_blank" rel="noreferrer"
-                          style={{ padding: "6px 14px", borderRadius: 8, background: "#7c3aed", color: "#fff", fontSize: 12, fontWeight: 600, textDecoration: "none", display: "flex", alignItems: "center", gap: 5 }}>
-                          💬 WhatsApp Certificate
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                )}
               </div>
             ))}
           </>
         )}
       </div>
 
-      {/* Reject / Cert-Reject modal */}
+      {/* ── VIEW / APPROVE MODAL ── */}
+      {viewRecord && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16 }}>
+          <div style={{ background: "#fff", borderRadius: 20, width: "100%", maxWidth: 520, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 24px 80px rgba(0,0,0,0.25)" }}>
+
+            {/* Modal header */}
+            <div style={{ padding: "20px 24px 16px", borderBottom: "1px solid #e2e8f0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: 17, color: "#0f172a" }}>Application Details</div>
+                <div style={{ fontSize: 11, color: "#94a3b8", letterSpacing: 1, textTransform: "uppercase", marginTop: 2 }}>Admin-only record controls</div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                {!editMode && (
+                  <button
+                    onClick={startEdit}
+                    style={{ padding: "7px 16px", borderRadius: 8, border: "1px solid #e2e8f0", background: "#f8fafc", color: "#0f172a", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+                  >
+                    Edit details
+                  </button>
+                )}
+                <button onClick={closeView} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#94a3b8", lineHeight: 1 }}>✕</button>
+              </div>
+            </div>
+
+            {/* Details / Edit form */}
+            <div style={{ padding: "20px 24px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 24px" }}>
+              {editMode ? (
+                // Edit form
+                <>
+                  {[
+                    ["fullName",        "Full Name",       "text"],
+                    ["phone",           "Phone",           "text"],
+                    ["email",           "Email",           "email"],
+                    ["enrollmentNumber","Enrollment No.",  "text"],
+                    ["collegeName",     "College",         "text"],
+                    ["branch",          "Branch",          "text"],
+                    ["semester",        "Semester",        "text"],
+                    ["gender",          "Gender",          "text"],
+                    ["technology",      "Technology",      "text"],
+                    ["startDate",       "Start Date",      "date"],
+                    ["endDate",         "End Date",        "date"],
+                  ].map(([key, label, type]) => (
+                    <div key={key}>
+                      <div style={{ fontSize: 10, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.8, fontWeight: 600, marginBottom: 4 }}>{label}</div>
+                      <input
+                        type={type}
+                        value={editFields[key] || ""}
+                        onChange={e => setEditFields(f => ({ ...f, [key]: e.target.value }))}
+                        style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "2px solid #e2e8f0", fontSize: 13, color: "#0f172a", outline: "none", boxSizing: "border-box" }}
+                        onFocus={e => { e.target.style.borderColor = "#1a56db"; }}
+                        onBlur={e => { e.target.style.borderColor = "#e2e8f0"; }}
+                      />
+                    </div>
+                  ))}
+                  <div>
+                    <div style={{ fontSize: 10, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.8, fontWeight: 600, marginBottom: 4 }}>Offer Letter Date</div>
+                    <input
+                      type="date"
+                      value={editFields.offerLetterDate || ""}
+                      onChange={e => setEditFields(f => ({ ...f, offerLetterDate: e.target.value }))}
+                      style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "2px solid #e2e8f0", fontSize: 13, color: "#0f172a", outline: "none", boxSizing: "border-box" }}
+                      onFocus={e => { e.target.style.borderColor = "#1a56db"; }}
+                      onBlur={e => { e.target.style.borderColor = "#e2e8f0"; }}
+                    />
+                  </div>
+                </>
+              ) : (
+                // View mode
+                <>
+                  {[
+                    ["Full Name",      viewRecord.fullName],
+                    ["Unique ID",      viewRecord.letterId],
+                    ["Phone",          viewRecord.phone],
+                    ["Email",          viewRecord.email],
+                    ["Enrollment No.", viewRecord.enrollmentNumber],
+                    ["College",        viewRecord.collegeName],
+                    ["Branch",         viewRecord.branch],
+                    ["Semester",       viewRecord.semester],
+                    ["Gender",         viewRecord.gender],
+                    ["Technology",     viewRecord.technology],
+                    ["Start Date",     fmtDate(viewRecord.startDate)],
+                    ["End Date",       fmtDate(viewRecord.endDate)],
+                  ].map(([k, v]) => (
+                    <div key={k}>
+                      <div style={{ fontSize: 10, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.8, fontWeight: 600, marginBottom: 3 }}>{k}</div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: "#0f172a", wordBreak: "break-word" }}>{v || "—"}</div>
+                    </div>
+                  ))}
+
+                  {/* Offer Letter Date */}
+                  <div style={{ gridColumn: "1 / -1" }}>
+                    <div style={{ fontSize: 10, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.8, fontWeight: 600, marginBottom: 3 }}>Offer Letter Date</div>
+                    {viewRecord.offerLetterDate
+                      ? <div style={{ fontSize: 14, fontWeight: 600, color: "#0f172a" }}>{viewRecord.offerLetterDate}</div>
+                      : <div style={{ fontSize: 13, color: "#94a3b8" }}>Not set yet</div>
+                    }
+                  </div>
+
+                  {/* Date picker for approve step 2 */}
+                  {approveStep === 2 && approveTarget === viewRecord.token && (
+                    <div style={{ gridColumn: "1 / -1" }}>
+                      <div style={{ fontSize: 10, color: "#1a56db", textTransform: "uppercase", letterSpacing: 0.8, fontWeight: 700, marginBottom: 6 }}>Set Offer Letter Date</div>
+                      <input
+                        type="date"
+                        value={offerLetterDate}
+                        onChange={e => setOfferLetterDate(e.target.value)}
+                        style={{ width: "100%", padding: "11px 14px", borderRadius: 10, border: "2px solid #1a56db", fontSize: 14, color: "#0f172a", outline: "none", boxSizing: "border-box" }}
+                      />
+                    </div>
+                  )}
+
+                  {/* Status */}
+                  <div style={{ gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                    <span style={{ fontSize: 13, color: "#64748b" }}>Current Status:</span>
+                    <Badge status={viewRecord.status} />
+                    {viewRecord.certStatus && viewRecord.certStatus !== "not_requested" && (
+                      <span style={{ fontSize: 11, background: "#ede9fe", color: "#7c3aed", borderRadius: 6, padding: "3px 8px", fontWeight: 700 }}>🎓 Cert: {viewRecord.certStatus}</span>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Notify section (view mode only) */}
+            {!editMode && (viewRecord.status === "approved" || viewRecord.status === "rejected") && (
+              <div style={{ padding: "0 24px 16px", display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <div style={{ fontSize: 11, color: "#94a3b8", fontWeight: 600, width: "100%", marginBottom: 4 }}>📣 Notify User</div>
+                {viewRecord.status === "approved" && (
+                  <>
+                    <a href={whatsappLink(viewRecord.phone, msgApproved(viewRecord.fullName, viewRecord.token))} target="_blank" rel="noreferrer"
+                      style={{ padding: "6px 14px", borderRadius: 8, background: "#25D366", color: "#fff", fontSize: 12, fontWeight: 600, textDecoration: "none" }}>
+                      💬 WhatsApp
+                    </a>
+                    <a href={mailtoLink(viewRecord.email, ...Object.values(emailApproved(viewRecord.fullName, viewRecord.token)))} target="_blank" rel="noreferrer"
+                      style={{ padding: "6px 14px", borderRadius: 8, background: "#ea4335", color: "#fff", fontSize: 12, fontWeight: 600, textDecoration: "none" }}>
+                      ✉️ Email
+                    </a>
+                  </>
+                )}
+                {viewRecord.status === "rejected" && (
+                  <a href={whatsappLink(viewRecord.phone, msgRejected(viewRecord.fullName, viewRecord.token, viewRecord.rejectionReason))} target="_blank" rel="noreferrer"
+                    style={{ padding: "6px 14px", borderRadius: 8, background: "#64748b", color: "#fff", fontSize: 12, fontWeight: 600, textDecoration: "none" }}>
+                    💬 WhatsApp Rejected
+                  </a>
+                )}
+                {viewRecord.certStatus === "approved" && (
+                  <a href={whatsappLink(viewRecord.phone, msgCertApproved(viewRecord.fullName, viewRecord.token, viewRecord.certId))} target="_blank" rel="noreferrer"
+                    style={{ padding: "6px 14px", borderRadius: 8, background: "#7c3aed", color: "#fff", fontSize: 12, fontWeight: 600, textDecoration: "none" }}>
+                    💬 Certificate
+                  </a>
+                )}
+              </div>
+            )}
+
+            {/* Action buttons */}
+            <div style={{ padding: "16px 24px 24px", borderTop: "1px solid #e2e8f0", display: "flex", gap: 10, flexWrap: "wrap" }}>
+              {editMode ? (
+                <>
+                  <button onClick={() => setEditMode(false)} style={{ flex: 1, padding: "12px", borderRadius: 10, border: "1px solid #e2e8f0", background: "#f8fafc", color: "#64748b", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Cancel</button>
+                  <button onClick={saveEdit} style={{ flex: 2, padding: "12px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#1a56db,#0ea5e9)", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer", boxShadow: "0 4px 12px rgba(26,86,219,0.3)" }}>Save Changes</button>
+                </>
+              ) : (
+                <>
+                  {/* PENDING actions */}
+                  {viewRecord.status === "pending" && (
+                    <>
+                      {approveStep === 1 || approveTarget !== viewRecord.token ? (
+                        <button onClick={() => startApprove(viewRecord.token)} style={{ flex: 1, minWidth: 110, padding: "12px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#065f46,#10b981)", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
+                          ✓ Approve
+                        </button>
+                      ) : (
+                        <button onClick={confirmApprove} disabled={!offerLetterDate} style={{ flex: 1, minWidth: 110, padding: "12px", borderRadius: 10, border: "none", background: offerLetterDate ? "linear-gradient(135deg,#065f46,#10b981)" : "#94a3b8", color: "#fff", fontWeight: 700, fontSize: 14, cursor: offerLetterDate ? "pointer" : "not-allowed" }}>
+                          ✓ Confirm Approval
+                        </button>
+                      )}
+                      <button onClick={() => openReject(viewRecord.token)} style={{ flex: 1, minWidth: 90, padding: "12px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#991b1b,#ef4444)", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>Reject</button>
+                    </>
+                  )}
+
+                  {/* APPROVED actions */}
+                  {viewRecord.status === "approved" && (
+                    <>
+                      <button
+                        onClick={async () => {
+                          const rec = store.get(viewRecord.token);
+                          if (!rec) return;
+                          if (!window.jspdf) {
+                            await new Promise(resolve => {
+                              const s = document.createElement("script");
+                              s.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+                              s.onload = resolve;
+                              document.head.appendChild(s);
+                            });
+                          }
+                          const { generateAdminOfferLetterPDF } = await import("../utils/generateAdminOfferLetterPDF");
+                          await generateAdminOfferLetterPDF(rec);
+                        }}
+                        style={{ flex: 2, padding: "12px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#1a56db,#0ea5e9)", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }}
+                      >
+                        ⬇ Download letter
+                      </button>
+                      <button onClick={() => openReject(viewRecord.token)} style={{ padding: "12px 18px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#991b1b,#ef4444)", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>Reject</button>
+                      <button onClick={() => resetToPending(viewRecord.token)} style={{ padding: "12px 18px", borderRadius: 10, border: "1px solid #e2e8f0", background: "#fff", color: "#64748b", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>↺ Reset</button>
+                    </>
+                  )}
+
+                  {/* REJECTED actions */}
+                  {viewRecord.status === "rejected" && (
+                    <button onClick={() => resetToPending(viewRecord.token)} style={{ flex: 1, padding: "12px", borderRadius: 10, border: "1px solid #e2e8f0", background: "#fff", color: "#64748b", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>↺ Reset to Pending</button>
+                  )}
+
+                  {/* Certificate actions */}
+                  {viewRecord.certStatus === "pending" && (
+                    <>
+                      <button onClick={() => { approveCert(viewRecord.token); setViewRecord(store.get(viewRecord.token)); }} style={{ padding: "12px 16px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#7c3aed,#a855f7)", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>🏆 Approve Cert</button>
+                      <button onClick={() => openRejectCert(viewRecord.token)} style={{ padding: "12px 16px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#991b1b,#ef4444)", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>✕ Reject Cert</button>
+                    </>
+                  )}
+
+                  {/* Delete — always shown */}
+                  <button onClick={() => deleteRecord(viewRecord.token)} style={{ padding: "12px 18px", borderRadius: 10, border: "1px solid #fca5a5", background: "#fff", color: "#dc2626", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Delete</button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {rejectTarget && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 20 }}>
           <div style={{ background: "#fff", borderRadius: 20, padding: "32px 28px", maxWidth: 440, width: "100%", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
