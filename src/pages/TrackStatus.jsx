@@ -86,21 +86,86 @@ export default function TrackStatus({ onNavigate }) {
   const steps = ["Submitted", "Under Review", "Decision Made", "Letter Ready"];
   const stepIndex = result ? (result.status === "pending" ? 1 : result.status === "approved" ? 3 : 2) : -1;
 
+  // ── Context-aware theme ────────────────────────────────────────────────────
+  const theme = !result ? {
+    pageBg:     "#f8fafc",
+    headerBg:   "linear-gradient(135deg,#0a1a3c,#0d2d6b)",
+    headerBadgeBg:   "rgba(56,189,248,0.15)",
+    headerBadgeBorder: "rgba(56,189,248,0.3)",
+    headerBadgeColor: "#38bdf8",
+    headerBadgeText: "🔍 Track Application",
+    headerTitle: "Track Your Status",
+    headerDesc:  "Enter your unique token to check the current status of your internship application.",
+  } : result.status === "approved" ? {
+    // 🎉 Celebratory — green/gold
+    pageBg:     "linear-gradient(180deg,#f0fdf4 0%,#f8fafc 40%)",
+    headerBg:   "linear-gradient(135deg,#064e3b,#065f46,#047857)",
+    headerBadgeBg:   "rgba(52,211,153,0.2)",
+    headerBadgeBorder: "rgba(52,211,153,0.4)",
+    headerBadgeColor: "#6ee7b7",
+    headerBadgeText: "🎉 Congratulations!",
+    headerTitle: "You're Approved!",
+    headerDesc:  "Your internship offer letter has been approved. Download it below.",
+    confetti: true,
+  } : result.status === "rejected" ? {
+    // ❌ Calm/neutral — grey
+    pageBg:     "#f8fafc",
+    headerBg:   "linear-gradient(135deg,#1e293b,#334155)",
+    headerBadgeBg:   "rgba(248,113,113,0.15)",
+    headerBadgeBorder: "rgba(248,113,113,0.3)",
+    headerBadgeColor: "#fca5a5",
+    headerBadgeText: "❌ Not Accepted",
+    headerTitle: "Application Status",
+    headerDesc:  "Your request was not accepted. Please contact HR for more information.",
+  } : {
+    // ⏳ Calm/waiting — blue
+    pageBg:     "#f8fafc",
+    headerBg:   "linear-gradient(135deg,#0a1a3c,#0d2d6b)",
+    headerBadgeBg:   "rgba(56,189,248,0.15)",
+    headerBadgeBorder: "rgba(56,189,248,0.3)",
+    headerBadgeColor: "#38bdf8",
+    headerBadgeText: "⏳ Under Review",
+    headerTitle: "Application Pending",
+    headerDesc:  "Your application is being reviewed. We'll update you soon.",
+  };
+
   return (
-    <div style={{ minHeight: "100vh", background: "#f8fafc", paddingBottom: 80 }}>
-      <div style={{ background: "linear-gradient(135deg,#0a1a3c,#0d2d6b)", padding: "48px 24px 64px", textAlign: "center" }} className="page-header">
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(56,189,248,0.15)", border: "1px solid rgba(56,189,248,0.3)", borderRadius: 50, padding: "5px 16px", fontSize: 12, fontWeight: 600, color: "#38bdf8", marginBottom: 16 }}>
-          🔍 Track Application
+    <div style={{ minHeight: "100vh", background: theme.pageBg, paddingBottom: 80, transition: "background 0.5s ease" }}>
+
+      {/* Confetti burst for approved */}
+      {theme.confetti && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, pointerEvents: "none", zIndex: 50, overflow: "hidden", height: 120 }}>
+          {[...Array(18)].map((_, i) => (
+            <div key={i} style={{
+              position: "absolute",
+              left: `${(i / 18) * 100}%`,
+              top: "-10px",
+              width: 8, height: 8,
+              borderRadius: i % 3 === 0 ? "50%" : 2,
+              background: ["#10b981","#34d399","#fbbf24","#60a5fa","#a78bfa","#f472b6"][i % 6],
+              animation: `fall${i % 3} ${1.2 + (i % 4) * 0.3}s ease-in ${(i % 5) * 0.15}s forwards`,
+              opacity: 0,
+            }} />
+          ))}
+          <style>{`
+            @keyframes fall0 { 0%{opacity:1;transform:translateY(0) rotate(0deg)} 100%{opacity:0;transform:translateY(130px) rotate(360deg)} }
+            @keyframes fall1 { 0%{opacity:1;transform:translateY(0) rotate(0deg)} 100%{opacity:0;transform:translateY(110px) rotate(-270deg)} }
+            @keyframes fall2 { 0%{opacity:1;transform:translateY(0) rotate(0deg)} 100%{opacity:0;transform:translateY(120px) rotate(180deg)} }
+          `}</style>
         </div>
-        <h1 style={{ color: "#fff", fontSize: "clamp(24px,4vw,40px)", fontWeight: 800, margin: "0 0 12px" }}>Track Your Status</h1>
-        <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 16, maxWidth: 440, margin: "0 auto" }}>
-          Enter your unique token to check the current status of your internship application.
-        </p>
+      )}
+
+      <div style={{ background: theme.headerBg, padding: "48px 24px 64px", textAlign: "center", transition: "background 0.5s ease" }} className="page-header">
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: theme.headerBadgeBg, border: `1px solid ${theme.headerBadgeBorder}`, borderRadius: 50, padding: "5px 16px", fontSize: 12, fontWeight: 600, color: theme.headerBadgeColor, marginBottom: 16 }}>
+          {theme.headerBadgeText}
+        </div>
+        <h1 style={{ color: "#fff", fontSize: "clamp(24px,4vw,40px)", fontWeight: 800, margin: "0 0 12px" }}>{theme.headerTitle}</h1>
+        <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 16, maxWidth: 480, margin: "0 auto" }}>{theme.headerDesc}</p>
       </div>
 
       <div style={{ maxWidth: 660, margin: "-32px auto 0", padding: "0 20px" }}>
         {/* Token input */}
-        <div style={{ background: "#fff", borderRadius: 20, padding: "24px 20px", boxShadow: "0 8px 40px rgba(0,0,0,0.1)", border: "1px solid #e2e8f0", marginBottom: 20 }}>
+        <div style={{ background: "#fff", borderRadius: 20, padding: "24px 20px", boxShadow: "0 8px 40px rgba(0,0,0,0.1)", border: `1px solid ${result?.status === "approved" ? "#6ee7b7" : "#e2e8f0"}`, marginBottom: 20, transition: "border-color 0.4s" }}>
           <div className="token-row">
             <input
               value={token}
@@ -232,6 +297,12 @@ export default function TrackStatus({ onNavigate }) {
                 </button>
               )}
 
+              {result.status === "approved" && (
+                <div style={{ background: "#d1fae5", border: "1px solid #6ee7b7", borderRadius: 10, padding: "12px 16px", display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: "#065f46", fontWeight: 600 }}>
+                  🔒 Details are locked after approval and cannot be edited.
+                </div>
+              )}
+
               {editing && (
                 <div style={{ background: "#fff", borderRadius: 16, padding: "20px", border: "2px solid #bfdbfe" }}>
                   <div style={{ fontWeight: 700, fontSize: 15, color: "#0f172a", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
@@ -284,9 +355,18 @@ export default function TrackStatus({ onNavigate }) {
               </div>
 
               {result.status === "approved" && (
-                <button onClick={() => onNavigate && onNavigate("download")} style={{ width: "100%", padding: "15px", borderRadius: 12, border: "none", background: "linear-gradient(135deg,#0d9e6e,#10b981)", color: "#fff", fontWeight: 700, fontSize: 15, cursor: "pointer", boxShadow: "0 6px 24px rgba(13,158,110,0.35)" }}>
-                  ⬇ Download Offer Letter
-                </button>
+                <>
+                  <style>{`
+                    @keyframes pulse-green {
+                      0%, 100% { box-shadow: 0 6px 24px rgba(13,158,110,0.35); }
+                      50%       { box-shadow: 0 6px 32px rgba(13,158,110,0.65), 0 0 0 6px rgba(13,158,110,0.12); }
+                    }
+                  `}</style>
+                  <button onClick={() => onNavigate && onNavigate("download")}
+                    style={{ width: "100%", padding: "16px", borderRadius: 12, border: "none", background: "linear-gradient(135deg,#065f46,#10b981)", color: "#fff", fontWeight: 800, fontSize: 16, cursor: "pointer", animation: "pulse-green 2s ease-in-out infinite", letterSpacing: 0.3 }}>
+                    🎉 Download Your Offer Letter
+                  </button>
+                </>
               )}
 
               {/* ── CERTIFICATE SECTION ── */}

@@ -284,6 +284,19 @@ const store = {
     ) || null;
   },
 
+  // Duplicate detection: find all active records matching email OR enrollment number
+  findDuplicates(email, enrollmentNumber, excludeToken = "") {
+    const all = Object.values(load());
+    return all.filter(r =>
+      r.token !== excludeToken &&
+      !r.expired &&
+      (
+        (email && r.email?.toLowerCase() === email.toLowerCase()) ||
+        (enrollmentNumber && r.enrollmentNumber?.trim().toLowerCase() === enrollmentNumber.trim().toLowerCase())
+      )
+    );
+  },
+
   clear() {
     localStorage.removeItem(LS_KEY);
   },

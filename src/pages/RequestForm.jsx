@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Input from "../components/Input";
 import Select from "../components/Select";
 import Popup from "../components/Popup";
@@ -18,9 +18,18 @@ export default function RequestForm({ onNavigate }) {
   const [autoFilled, setAutoFilled] = useState(false);
   const [darkMode] = useState(() => localStorage.getItem("kvl_dark") === "1");
 
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  // Duplicate / smart warning state
+  const [duplicateWarnings, setDuplicateWarnings] = useState([]);
+  const [showDuplicateConfirm, setShowDuplicateConfirm] = useState(false);
+  const [smartWarnings, setSmartWarnings] = useState([]);
 
-  // Auto-fill on email blur
+  const set = (k, v) => {
+    setForm(f => ({ ...f, [k]: v }));
+    // Clear smart warning for this field when user edits it
+    setSmartWarnings(w => w.filter(x => x.field !== k));
+  };
+
+  // ── Auto-fill ──────────────────────────────────────────────────────────────
   const handleEmailBlur = () => {
     if (autoFilled || !form.email.trim()) return;
     const existing = store.findByContact(form.email.trim(), "");
@@ -37,9 +46,10 @@ export default function RequestForm({ onNavigate }) {
       }));
       setAutoFilled(true);
     }
+    // Check duplicates on email blur
+    checkDuplicates(form.email.trim(), form.enrollmentNumber.trim());
   };
 
-  // Auto-fill on phone blur
   const handlePhoneBlur = () => {
     if (autoFilled || !form.phone.trim()) return;
     const existing = store.findByContact("", form.phone.trim());
@@ -58,8 +68,55 @@ export default function RequestForm({ onNavigate }) {
     }
   };
 
+  const handleEnrollmentBlur = () => {
+    if (!form.enrollmentNumber.trim()) return;
+    checkDuplicates(form.email.trim(), form.enrollmentNumber.trim());
+  };
+
+  // ── Duplicate detection ────────────────────────────────────────────────────
+  const checkDuplicates = (email, enrollmentNumber) => {
+    if (!email && !enrollmentNumber) return;
+    const dupes = store.findDuplicates(email, enrollmentNumber);
+    setDuplicateWarnings(dupes);
+  };
+
+  // ── Smart error prevention ─────────────────────────────────────────────────
+  const runSmartChecks = (f) => {
+    const warnings = [];
+    // Future start date check
+    if (f.startDate) {
+      const start = new Date(f.startDate);
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      if (start < now) {
+        warnings.push({ field: "startDate", msg: "Start date is in the past. Is this intentional?" });
+      }
+    }
+    // Very short duration
+    if (f.startDate && f.endDate) {
+      const ms = new Date(f.endDate) - new Date(f.startDate);
+      const days = ms / (1000 * 60 * 60 * 24);
+      if (days < 7) {
+        warnings.push({ field: "endDate", msg: "Internship duration is less than 1 week. Please verify dates." });
+      }
+      if (days > 365) {
+        warnings.push({ field: "endDate", msg: "Internship duration exceeds 1 year. Please verify dates." });
+      }
+    }
+    // Suspicious enrollment number (too short)
+    if (f.enrollmentNumber && f.enrollmentNumber.trim().length < 5) {
+      warnings.push({ field: "enrollmentNumber", msg: "Enrollment number seems too short. Please verify." });
+    }
+    // Generic email domains that might be wrong
+    if (f.email && (f.email.includes("test@") || f.email.includes("dummy@") || f.email.includes("abc@"))) {
+      warnings.push({ field: "email", msg: "This looks like a test email. Please use your real email." });
+    }
+    return warnings;
+  };
+
   const duration = calcDuration(form.startDate, form.endDate);
 
+  // ── Validation ─────────────────────────────────────────────────────────────
   const validate = () => {
     const e = {};
     if (!form.fullName.trim()) e.fullName = "Full name is required";
@@ -81,10 +138,28 @@ export default function RequestForm({ onNavigate }) {
     return e;
   };
 
+  // ── Submit ─────────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
     const e = validate();
     setErrors(e);
     if (Object.keys(e).length) return;
+
+    // Run smart checks
+    const sw = runSmartChecks(form);
+    setSmartWarnings(sw);
+
+    // Check duplicates
+    const dupes = store.findDuplicates(form.email.trim(), form.enrollmentNumber.trim());
+    setDuplicateWarnings(dupes);
+
+    // If there are duplicates or smart warnings, show confirmation first
+    if ((dupes.length > 0 || sw.length > 0) && !showDuplicateConfirm) {
+      setShowDuplicateConfirm(true);
+      return;
+    }
+
+    // Proceed with submission
+    setShowDuplicateConfirm(false);
     setSubmitting(true);
     await new Promise(r => setTimeout(r, 800));
     const technologyFinal = form.technology === "Other" ? form.otherTechnology : form.technology;
@@ -171,7 +246,7 @@ export default function RequestForm({ onNavigate }) {
               <option value="">Select gender</option>
               <option>Male</option><option>Female</option><option>Other</option><option>Prefer not to say</option>
             </Select>
-            <Input label="Enrollment Number *" value={form.enrollmentNumber} onChange={e => set("enrollmentNumber", e.target.value)} placeholder="e.g. EN2021CS001" error={errors.enrollmentNumber} />
+            <Input label="Enrollment Number *" value={form.enrollmentNumber} onChange={e => set("enrollmentNumber", e.target.value)} onBlur={handleEnrollmentBlur} placeholder="e.g. EN2021CS001" error={errors.enrollmentNumber} />
           </div>
 
           <div style={{ height: 1, background: border, margin: "0 0 24px" }} />
@@ -229,6 +304,57 @@ export default function RequestForm({ onNavigate }) {
           {duration && (
             <div style={{ marginTop: 12, display: "inline-flex", alignItems: "center", gap: 8, background: "#d1fae5", border: "1px solid #6ee7b7", borderRadius: 8, padding: "6px 14px", fontSize: 13, fontWeight: 600, color: "#065f46" }}>
               ⏱ Duration: {duration}
+            </div>
+          )}
+
+          {/* Smart warnings */}
+          {smartWarnings.length > 0 && (
+            <div style={{ background: "#fef3c7", border: "1px solid #fcd34d", borderRadius: 12, padding: "14px 16px", marginBottom: 4 }}>
+              <div style={{ fontWeight: 700, fontSize: 13, color: "#92400e", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+                ⚠️ Please review before submitting
+              </div>
+              {smartWarnings.map((w, i) => (
+                <div key={i} style={{ fontSize: 12, color: "#b45309", marginBottom: 4, display: "flex", alignItems: "flex-start", gap: 6 }}>
+                  <span style={{ flexShrink: 0 }}>•</span> {w.msg}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Duplicate warning */}
+          {duplicateWarnings.length > 0 && (
+            <div style={{ background: "#fee2e2", border: "1px solid #fca5a5", borderRadius: 12, padding: "14px 16px", marginBottom: 4 }}>
+              <div style={{ fontWeight: 700, fontSize: 13, color: "#991b1b", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+                🔴 Duplicate Application Detected
+              </div>
+              {duplicateWarnings.map((d, i) => (
+                <div key={i} style={{ fontSize: 12, color: "#b91c1c", marginBottom: 4 }}>
+                  • Existing request found — <strong>{d.fullName}</strong> ({d.email}) · Status: <strong style={{ textTransform: "capitalize" }}>{d.status}</strong> · Token: <span style={{ fontFamily: "monospace" }}>{d.token}</span>
+                </div>
+              ))}
+              <div style={{ fontSize: 12, color: "#991b1b", marginTop: 6, fontStyle: "italic" }}>
+                You can still submit, but please ensure this is not a duplicate request.
+              </div>
+            </div>
+          )}
+
+          {/* Duplicate/warning confirmation */}
+          {showDuplicateConfirm && (
+            <div style={{ background: "#fff7ed", border: "2px solid #fb923c", borderRadius: 12, padding: "16px" }}>
+              <div style={{ fontWeight: 700, fontSize: 14, color: "#c2410c", marginBottom: 8 }}>⚠️ Confirm Submission</div>
+              <div style={{ fontSize: 13, color: "#7c2d12", marginBottom: 14, lineHeight: 1.6 }}>
+                {duplicateWarnings.length > 0 && "A similar application already exists. "}
+                {smartWarnings.length > 0 && "Some details need your attention. "}
+                Are you sure you want to proceed with this submission?
+              </div>
+              <div style={{ display: "flex", gap: 10 }}>
+                <button onClick={() => setShowDuplicateConfirm(false)} style={{ flex: 1, padding: "10px", borderRadius: 8, border: "1px solid #e2e8f0", background: "#f8fafc", color: "#64748b", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
+                  Go Back & Review
+                </button>
+                <button onClick={handleSubmit} style={{ flex: 1, padding: "10px", borderRadius: 8, border: "none", background: "linear-gradient(135deg,#c2410c,#ea580c)", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
+                  Yes, Submit Anyway
+                </button>
+              </div>
             </div>
           )}
 

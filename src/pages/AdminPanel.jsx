@@ -392,13 +392,18 @@ export default function AdminPanel({ onNavigate }) {
                 <div style={{ fontSize: 11, color: "#94a3b8", letterSpacing: 1, textTransform: "uppercase", marginTop: 2 }}>Admin-only record controls</div>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                {!editMode && (
+                {!editMode && viewRecord.status !== "approved" && (
                   <button
                     onClick={startEdit}
                     style={{ padding: "7px 16px", borderRadius: 8, border: "1px solid #e2e8f0", background: "#f8fafc", color: "#0f172a", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
                   >
                     Edit details
                   </button>
+                )}
+                {!editMode && viewRecord.status === "approved" && (
+                  <span style={{ fontSize: 11, background: "#d1fae5", color: "#065f46", borderRadius: 6, padding: "4px 10px", fontWeight: 600, border: "1px solid #6ee7b7" }}>
+                    🔒 Locked
+                  </span>
                 )}
                 <button onClick={closeView} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#94a3b8", lineHeight: 1 }}>✕</button>
               </div>
@@ -491,14 +496,37 @@ export default function AdminPanel({ onNavigate }) {
                     </div>
                   )}
 
-                  {/* Status */}
-                  <div style={{ gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                    <span style={{ fontSize: 13, color: "#64748b" }}>Current Status:</span>
-                    <Badge status={viewRecord.status} />
-                    {viewRecord.certStatus && viewRecord.certStatus !== "not_requested" && (
-                      <span style={{ fontSize: 11, background: "#ede9fe", color: "#7c3aed", borderRadius: 6, padding: "3px 8px", fontWeight: 700 }}>🎓 Cert: {viewRecord.certStatus}</span>
-                    )}
+            {/* Duplicate warning for admin */}
+            {(() => {
+              const dupes = store.findDuplicates(viewRecord.email, viewRecord.enrollmentNumber, viewRecord.token);
+              if (!dupes.length) return null;
+              return (
+                <div style={{ gridColumn: "1 / -1", background: "#fee2e2", border: "1px solid #fca5a5", borderRadius: 10, padding: "12px 16px" }}>
+                  <div style={{ fontWeight: 700, fontSize: 12, color: "#991b1b", marginBottom: 6, display: "flex", alignItems: "center", gap: 6 }}>
+                    🔴 Duplicate Applications Found ({dupes.length})
                   </div>
+                  {dupes.map(d => (
+                    <div key={d.token} style={{ fontSize: 11, color: "#b91c1c", marginBottom: 3 }}>
+                      • <strong>{d.fullName}</strong> · {d.email} · <span style={{ fontFamily: "monospace" }}>{d.token}</span> · Status: <strong style={{ textTransform: "capitalize" }}>{d.status}</strong>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+
+              {/* Status */}
+              <div style={{ gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 13, color: "#64748b" }}>Current Status:</span>
+                <Badge status={viewRecord.status} />
+                {viewRecord.status === "approved" && (
+                  <span style={{ fontSize: 11, background: "#d1fae5", color: "#065f46", borderRadius: 6, padding: "3px 8px", fontWeight: 600, border: "1px solid #6ee7b7" }}>
+                    🔒 Details Locked
+                  </span>
+                )}
+                {viewRecord.certStatus && viewRecord.certStatus !== "not_requested" && (
+                  <span style={{ fontSize: 11, background: "#ede9fe", color: "#7c3aed", borderRadius: 6, padding: "3px 8px", fontWeight: 700 }}>🎓 Cert: {viewRecord.certStatus}</span>
+                )}
+              </div>
                 </>
               )}
             </div>
