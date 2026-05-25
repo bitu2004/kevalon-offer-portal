@@ -3,3 +3,4 @@ node_modules/
 dist/
 .vscode/
 cloudflared.exe
+hs_err_pid*.log

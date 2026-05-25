@@ -1,4 +1,5 @@
 import kevalonLogo from "../assets/kevalon-logo.png";
+import { LinkedInIcon, InstagramIcon, TwitterXIcon, WhatsAppIcon } from "../components/SocialIcons";
 
 const HOW_IT_WORKS = [
   {
@@ -32,12 +33,12 @@ const HOW_IT_WORKS = [
 ];
 
 const FEATURES = [
-  { icon: "🔐", title: "Secure Token System",   desc: "Every application gets a unique token — your key to tracking and downloading." },
-  { icon: "⚡", title: "Instant Processing",     desc: "Submit your form and get a token in seconds. No waiting, no paperwork." },
-  { icon: "📄", title: "Professional PDF",       desc: "Download a beautifully designed offer letter with your details and our branding." },
-  { icon: "📡", title: "Real-time Status",       desc: "Track your application status live — pending, approved, or rejected." },
-  { icon: "🎓", title: "All Branches Welcome",   desc: "Open to students from all engineering and technology branches." },
-  { icon: "🌐", title: "100% Online",            desc: "Completely paperless process — apply, track, and download from anywhere." },
+  { icon: "🔐", title: "Secure Token System", desc: "Every application gets a unique token — your key to tracking and downloading." },
+  { icon: "⚡", title: "Instant Processing", desc: "Submit your form and get a token in seconds. No waiting, no paperwork." },
+  { icon: "📄", title: "Professional PDF", desc: "Download a beautifully designed offer letter with your details and our branding." },
+  { icon: "📡", title: "Real-time Status", desc: "Track your application status live — pending, approved, or rejected." },
+  { icon: "🎓", title: "All Branches Welcome", desc: "Open to students from all engineering and technology branches." },
+  { icon: "🌐", title: "100% Online", desc: "Completely paperless process — apply, track, and download from anywhere." },
 ];
 
 export default function WelcomePage({ onNavigate }) {
@@ -269,14 +270,16 @@ export default function WelcomePage({ onNavigate }) {
               </p>
               <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
                 {[
-                  { icon: "💼", url: "https://www.linkedin.com/company/kevalon-technology" },
-                  { icon: "📸", url: "https://www.instagram.com/kevalon_technology" },
-                  { icon: "🐦", url: "https://x.com/KevalonT" },
-                  { icon: "💬", url: "https://wa.link/a02fdn" },
-                ].map(s => (
-                  <a key={s.url} href={s.url} target="_blank" rel="noreferrer"
-                    style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, textDecoration: "none" }}>
-                    {s.icon}
+                  { Icon: LinkedInIcon, url: "https://www.linkedin.com/company/kevalon-technology", color: "#0a66c2" },
+                  { Icon: InstagramIcon, url: "https://www.instagram.com/kevalon_technology", color: "#e1306c" },
+                  { Icon: TwitterXIcon, url: "https://x.com/KevalonT", color: "#fff" },
+                  { Icon: WhatsAppIcon, url: "https://wa.link/a02fdn", color: "#25D366" },
+                ].map(({ Icon, url, color }) => (
+                  <a key={url} href={url} target="_blank" rel="noreferrer"
+                    style={{ width: 34, height: 34, borderRadius: 8, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", color, transition: "background 0.2s" }}
+                    onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.18)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}>
+                    <Icon size={17} />
                   </a>
                 ))}
               </div>
@@ -287,7 +290,7 @@ export default function WelcomePage({ onNavigate }) {
               <div style={{ color: "#fff", fontWeight: 700, fontSize: 13, marginBottom: 14, textTransform: "uppercase", letterSpacing: 1 }}>Contact</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {["+91 90810 12218", "+91 91040 12218", "+91 97252 47990"].map(p => (
-                  <a key={p} href={`tel:${p.replace(/\s/g,"")}`} style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, textDecoration: "none" }}
+                  <a key={p} href={`tel:${p.replace(/\s/g, "")}`} style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, textDecoration: "none" }}
                     onMouseEnter={e => { e.currentTarget.style.color = "#38bdf8"; }}
                     onMouseLeave={e => { e.currentTarget.style.color = "rgba(255,255,255,0.6)"; }}>
                     📞 {p}
@@ -313,17 +316,18 @@ export default function WelcomePage({ onNavigate }) {
             {/* Address & Hours */}
             <div>
               <div style={{ color: "#fff", fontWeight: 700, fontSize: 13, marginBottom: 14, textTransform: "uppercase", letterSpacing: 1 }}>Office</div>
-              <div style={{ color: "rgba(255,255,255,0.55)", fontSize: 12, lineHeight: 1.8 }}>
-                📍 913, Solaris Business Hub,<br />
-                Parshwanath Jain BRTS, Sola Road,<br />
-                Bhuyangdev, Ahmedabad, India
+              <div style={{ display: "flex", gap: 6, color: "rgba(255,255,255,0.55)", fontSize: 12, lineHeight: 1.8, alignItems: "flex-start" }}>
+                <span style={{ flexShrink: 0 }}>📍</span>
+                <div>
+                  913, Solaris Business Hub,<br />
+                  Parshwanath Jain BRTS, Sola Road,
+                  Bhuyangdev,<br />
+                  Ahmedabad, India
+                </div>
               </div>
               <div style={{ color: "rgba(255,255,255,0.45)", fontSize: 12, marginTop: 10 }}>
                 🕐 Mon – Sat : 10 AM – 7 PM
               </div>
-              <button onClick={() => onNavigate("contact")} style={{ marginTop: 12, background: "transparent", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 8, padding: "6px 14px", color: "rgba(255,255,255,0.6)", fontSize: 12, cursor: "pointer" }}>
-                View Contact Page →
-              </button>
             </div>
 
           </div>

@@ -83,9 +83,25 @@
         .popup-token { font-size: 20px !important; letter-spacing: 2px !important; }
       }
 
-      /* ── Status banner icon + text ── */
+      /* ── Admin Panel responsive ── */
+      @media (max-width: 600px) {
+        .admin-stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+        .admin-analytics-grid { grid-template-columns: 1fr !important; }
+        .admin-filter-row { flex-wrap: wrap !important; gap: 6px !important; }
+        .admin-filter-row button { font-size: 11px !important; padding: 6px 10px !important; }
+        .admin-header-btns { flex-wrap: wrap !important; gap: 6px !important; }
+        .admin-header-btns button { font-size: 11px !important; padding: 6px 10px !important; }
+        .admin-tabs button { font-size: 12px !important; padding: 7px 12px !important; }
+        .admin-bulk-row { flex-direction: column !important; align-items: flex-start !important; }
+        .admin-modal { padding: 20px 16px !important; }
+        .admin-modal-grid { grid-template-columns: 1fr !important; }
+        .admin-modal-actions { flex-wrap: wrap !important; }
+        .admin-modal-actions button { flex: unset !important; width: 100% !important; }
+        .admin-req-row { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
+        .admin-req-actions { flex-wrap: wrap !important; width: 100% !important; }
+      }
       @media (max-width: 400px) {
-        .status-banner { flex-direction: column !important; align-items: flex-start !important; }
+        .admin-stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
       }
 
       /* ── Prevent horizontal scroll ── */

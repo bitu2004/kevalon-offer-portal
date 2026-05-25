@@ -1,4 +1,5 @@
 import kevalonLogo from "../assets/kevalon-logo.png";
+import { LinkedInIcon, InstagramIcon, TwitterXIcon } from "../components/SocialIcons";
 
 export default function ContactPage() {
   return (
@@ -106,13 +107,13 @@ export default function ContactPage() {
             <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 12, fontWeight: 600, marginBottom: 10, textTransform: "uppercase", letterSpacing: 1 }}>Follow Us</div>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               {[
-                { label: "LinkedIn",  url: "https://www.linkedin.com/company/kevalon-technology", icon: "💼" },
-                { label: "Instagram", url: "https://www.instagram.com/kevalon_technology",         icon: "📸" },
-                { label: "Twitter",   url: "https://x.com/KevalonT",                              icon: "🐦" },
+                { label: "LinkedIn",  Icon: LinkedInIcon,  url: "https://www.linkedin.com/company/kevalon-technology", color: "#0a66c2" },
+                { label: "Instagram", Icon: InstagramIcon, url: "https://www.instagram.com/kevalon_technology",         color: "#e1306c" },
+                { label: "Twitter",   Icon: TwitterXIcon,  url: "https://x.com/KevalonT",                              color: "#fff" },
               ].map(s => (
                 <a key={s.label} href={s.url} target="_blank" rel="noreferrer"
-                  style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 14px", borderRadius: 8, background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: 12, fontWeight: 600, textDecoration: "none" }}>
-                  {s.icon} {s.label}
+                  style={{ display: "flex", alignItems: "center", gap: 7, padding: "7px 14px", borderRadius: 8, background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: 12, fontWeight: 600, textDecoration: "none" }}>
+                  <s.Icon size={15} /> {s.label}
                 </a>
               ))}
             </div>

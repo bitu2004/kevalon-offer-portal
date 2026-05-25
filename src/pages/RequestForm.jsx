@@ -228,8 +228,8 @@ export default function RequestForm({ onNavigate }) {
           <div style={{ height: 1, background: border, margin: "0 0 24px" }} />
 
           {/* Personal */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: "linear-gradient(135deg,#1a56db,#0ea5e9)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>👤</div>
+          <div style={{ display: "flex", alignItems: "center", marginBottom: 24 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}></div>
             <div>
               <div style={{ fontWeight: 700, fontSize: 16, color: text }}>Personal Information</div>
               <div style={{ fontSize: 12, color: sub }}>All fields marked * are required</div>

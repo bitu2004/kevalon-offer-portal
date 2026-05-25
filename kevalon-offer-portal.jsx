@@ -592,7 +592,7 @@ function AdminPanel({ onBack }) {
           <div key={req.token} style={{ background: "var(--color-background-primary)", borderRadius: 12, padding: "18px 20px", border: "1px solid var(--color-border-tertiary)", marginBottom: 12 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 10, background: "#e0f2fe", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>👤</div>
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: "#e0f2fe", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}></div>
                 <div>
                   <div style={{ fontWeight: 600, fontSize: 15, fontFamily: "sans-serif" }}>{req.fullName}</div>
                   <div style={{ fontSize: 12, color: "var(--color-text-secondary)", fontFamily: "sans-serif" }}>{req.email} · {req.collegeName}</div>

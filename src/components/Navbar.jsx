@@ -9,7 +9,6 @@ export default function Navbar({ page, onNavigate }) {
     { label: "Apply",            key: "request" },
     { label: "Track & Download", key: "track" },
     { label: "Verify",           key: "verify" },
-    { label: "Contact",          key: "contact" },
   ];
 
   const active = {

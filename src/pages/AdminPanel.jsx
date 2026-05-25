@@ -207,7 +207,7 @@ export default function AdminPanel({ onNavigate }) {
             <h1 style={{ color: "#fff", fontSize: 20, fontWeight: 800, margin: "0 0 2px" }}>Admin Panel</h1>
             <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, margin: 0 }}>Kevalon Technology HR Portal</p>
           </div>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }} className="admin-header-btns">
             <button onClick={() => onNavigate && onNavigate("home")} style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.08)", color: "#fff", fontSize: 13, fontWeight: 500, cursor: "pointer" }}>
               ← Back
             </button>
@@ -220,7 +220,7 @@ export default function AdminPanel({ onNavigate }) {
           </div>
         </div>
         {/* Tabs */}
-        <div style={{ maxWidth: 1100, margin: "16px auto 0", display: "flex", gap: 4 }}>
+        <div style={{ maxWidth: 1100, margin: "16px auto 0", display: "flex", gap: 4 }} className="admin-tabs">
           {TABS.map(t => (
             <button key={t} onClick={() => setTab(t)} style={{ padding: "8px 20px", borderRadius: 8, border: "none", background: tab === t ? "#fff" : "transparent", color: tab === t ? "#0f172a" : "rgba(255,255,255,0.6)", fontSize: 13, fontWeight: tab === t ? 700 : 400, cursor: "pointer", textTransform: "capitalize" }}>
               {t === "requests" ? "📋 Requests" : "📊 Analytics"}
@@ -234,7 +234,7 @@ export default function AdminPanel({ onNavigate }) {
         {tab === "analytics" && analytics && (
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             {/* Summary cards */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px,1fr))", gap: 16 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px,1fr))", gap: 16 }} className="admin-stats-grid">
               {[
                 { label: "Total",         val: analytics.total,        color: "#1a56db", icon: "📋" },
                 { label: "Pending",       val: analytics.pending,      color: "#b45309", icon: "⏳" },
@@ -353,7 +353,7 @@ export default function AdminPanel({ onNavigate }) {
                     {req.status === "pending" && (
                       <input type="checkbox" checked={selectedTokens.includes(req.token)} onChange={() => toggleSelect(req.token)} style={{ width: 16, height: 16, accentColor: "#1a56db", cursor: "pointer" }} />
                     )}
-                    <div style={{ width: 42, height: 42, borderRadius: 11, background: "linear-gradient(135deg,#eff6ff,#dbeafe)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>👤</div>
+                    <div style={{ width: 42, height: 42, borderRadius: 11, background: "linear-gradient(135deg,#eff6ff,#dbeafe)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}></div>
                     <div>
                       <div style={{ fontWeight: 700, fontSize: 14, color: text }}>{req.fullName}</div>
                       <div style={{ fontSize: 11, color: sub, marginTop: 1 }}>{req.email}</div>
