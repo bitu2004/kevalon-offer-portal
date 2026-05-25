@@ -2,7 +2,6 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const path = require("path");
 
 dotenv.config();
 
@@ -25,9 +24,24 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Root Route (FIXES Cannot GET /)
+// Root Route
 app.get("/", (req, res) => {
-  res.send("🚀 Kevalon Backend API Running Successfully");
+  res.json({
+    name: "Kevalon Technology — Internship Portal API",
+    version: "1.0.0",
+    status: "✅ Running",
+    db: mongoose.connection.readyState === 1 ? "✅ MongoDB Atlas Connected" : "⚠️ Disconnected",
+    endpoints: {
+      health:       "GET  /api/health",
+      submit:       "POST /api/applications/submit",
+      checkStatus:  "GET  /api/applications/status/:uniqueId",
+      adminLogin:   "POST /api/admin/login",
+      getAllApps:    "GET  /api/admin/applications  (Bearer token required)",
+      updateStatus: "PUT  /api/admin/applications/:id/status  (Bearer token required)",
+      updateApp:    "PUT  /api/admin/applications/:id  (Bearer token required)",
+      deleteApp:    "DELETE /api/admin/applications/:id  (Bearer token required)",
+    },
+  });
 });
 
 // Routes
