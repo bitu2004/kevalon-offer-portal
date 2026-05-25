@@ -7,6 +7,7 @@ import { SEMESTERS, TECHNOLOGIES, BRANCHES } from "../constants";
 import { generateOfferLetterPDF } from "../utils/generateOfferLetterPDF";
 import { generateCertificatePDF } from "../utils/generateCertificatePDF";
 import { getBaseUrl } from "../utils/getBaseUrl";
+import { checkStatus as apiCheckStatus, checkBackendHealth } from "../utils/api";
 
 export default function TrackDownload({ onNavigate }) {
   const [token, setToken] = useState("");
@@ -35,7 +36,49 @@ export default function TrackDownload({ onNavigate }) {
     setError(""); setResult(null); setEditing(false); setRenewalDone(null); setShowQR(false);
     if (!token.trim()) { setError("Please enter your token."); return; }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 500));
+
+    try {
+      // Try backend first
+      const backendUp = await checkBackendHealth();
+      if (backendUp) {
+        try {
+          const res = await apiCheckStatus(token.trim().toUpperCase());
+          if (res.success && res.data) {
+            // Map backend fields → frontend fields
+            const d = res.data;
+            const mapped = {
+              token: d.uniqueId,
+              letterId: d.uniqueId,
+              fullName: d.name,
+              email: d.emailId || d.email,
+              phone: d.number || d.phone,
+              enrollmentNumber: d.enrollmentNumber,
+              collegeName: d.college,
+              branch: d.branch,
+              semester: d.semester,
+              gender: d.gender,
+              technology: d.technology,
+              startDate: d.startDate,
+              endDate: d.endDate,
+              offerLetterDate: d.offerLetterDate,
+              status: d.status,
+              rejectionReason: d.adminNote || "",
+              submittedAt: d.createdAt,
+              duration: d.duration || "",
+              downloadCount: d.downloadCount || 0,
+              certStatus: d.certStatus || "not_requested",
+              certId: d.certId || null,
+              _backendId: d._id,
+            };
+            setLoading(false);
+            setResult(mapped);
+            return;
+          }
+        } catch { /* fall through to localStorage */ }
+      }
+    } catch { /* fall through */ }
+
+    // Fallback to localStorage
     const data = store.get(token.trim().toUpperCase());
     setLoading(false);
     if (!data) { setError("Token not found. Please check and try again."); return; }

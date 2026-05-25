@@ -1,218 +1,147 @@
-const Application = require('../models/Application');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
+const mongoose = require("mongoose");
+const jsonDb = require("../db/jsonStore");
+const jwt = require("jsonwebtoken");
+
+const usesMongo = () => mongoose.connection.readyState === 1;
+let Application;
+const getModel = () => { if (!Application) Application = require("../models/Application"); return Application; };
 
 // Admin login
 const adminLogin = async (req, res) => {
   try {
     const { username, password } = req.body;
-
-    const adminUsername = process.env.ADMIN_USERNAME || 'admin';
-    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
-
-    if (username !== adminUsername || password !== adminPassword) {
-      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    if (username !== (process.env.ADMIN_USERNAME || "admin") || password !== (process.env.ADMIN_PASSWORD || "admin123")) {
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
-
-    const token = jwt.sign(
-      { username, role: 'admin' },
-      process.env.JWT_SECRET || 'fallback_secret',
-      { expiresIn: '8h' }
-    );
-
-    res.json({ success: true, token, message: 'Login successful' });
+    const token = jwt.sign({ username, role: "admin" }, process.env.JWT_SECRET || "kevalon_secret", { expiresIn: "8h" });
+    res.json({ success: true, token, message: "Login successful" });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
-// Get all applications with filters
+// Get all applications
 const getAllApplications = async (req, res) => {
   try {
-    const { status, search, page = 1, limit = 10 } = req.query;
-    const query = {};
+    const { status, search } = req.query;
 
-    if (status && status !== 'all') {
-      query.status = status;
-    }
-
-    if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { uniqueId: { $regex: search, $options: 'i' } },
-        { enrollmentNumber: { $regex: search, $options: 'i' } },
-        { college: { $regex: search, $options: 'i' } },
-        { emailId: { $regex: search, $options: 'i' } }
-      ];
-    }
-
-    const total = await Application.countDocuments(query);
-    const applications = await Application.find(query)
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(parseInt(limit));
-
-    // Stats
-    const stats = {
-      total: await Application.countDocuments(),
-      pending: await Application.countDocuments({ status: 'pending' }),
-      approved: await Application.countDocuments({ status: 'approved' }),
-      rejected: await Application.countDocuments({ status: 'rejected' })
-    };
-
-    res.json({
-      success: true,
-      data: applications,
-      stats,
-      pagination: {
-        total,
-        page: parseInt(page),
-        pages: Math.ceil(total / limit),
-        limit: parseInt(limit)
+    if (usesMongo()) {
+      const App = getModel();
+      const query = {};
+      if (status && status !== "all") query.status = status;
+      if (search) {
+        query.$or = [
+          { name: { $regex: search, $options: "i" } },
+          { uniqueId: { $regex: search, $options: "i" } },
+          { enrollmentNumber: { $regex: search, $options: "i" } },
+          { college: { $regex: search, $options: "i" } },
+          { emailId: { $regex: search, $options: "i" } },
+        ];
       }
-    });
+      const apps = await App.find(query).sort({ createdAt: -1 }).limit(500);
+      const stats = {
+        total:    await App.countDocuments(),
+        pending:  await App.countDocuments({ status: "pending" }),
+        approved: await App.countDocuments({ status: "approved" }),
+        rejected: await App.countDocuments({ status: "rejected" }),
+      };
+      return res.json({ success: true, data: apps, stats });
+    }
+
+    // JSON fallback
+    let apps = jsonDb.getAll();
+    if (status && status !== "all") apps = apps.filter(a => a.status === status);
+    if (search) {
+      const s = search.toLowerCase();
+      apps = apps.filter(a => a.name?.toLowerCase().includes(s) || a.uniqueId?.toLowerCase().includes(s) || a.enrollmentNumber?.toLowerCase().includes(s));
+    }
+    const all = jsonDb.getAll();
+    const stats = { total: all.length, pending: all.filter(a => a.status === "pending").length, approved: all.filter(a => a.status === "approved").length, rejected: all.filter(a => a.status === "rejected").length };
+    res.json({ success: true, data: apps.reverse(), stats });
+
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
-// Get single application
+// Get single
 const getApplication = async (req, res) => {
   try {
-    const application = await Application.findById(req.params.id);
-    if (!application) {
-      return res.status(404).json({ success: false, message: 'Application not found' });
+    if (usesMongo()) {
+      const App = getModel();
+      const app = await App.findById(req.params.id);
+      if (!app) return res.status(404).json({ success: false, message: "Not found" });
+      return res.json({ success: true, data: app });
     }
-    res.json({ success: true, data: application });
+    const app = jsonDb.getById(req.params.id);
+    if (!app) return res.status(404).json({ success: false, message: "Not found" });
+    res.json({ success: true, data: app });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
-// Update submitted application details from the admin panel
+// Update details
 const updateApplication = async (req, res) => {
   try {
-    const editableFields = [
-      'name',
-      'number',
-      'emailId',
-      'enrollmentNumber',
-      'college',
-      'branch',
-      'semester',
-      'gender',
-      'technology',
-      'startDate',
-      'endDate'
-    ];
-    const updates = editableFields.reduce((values, field) => {
-      if (Object.prototype.hasOwnProperty.call(req.body, field)) {
-        values[field] = req.body[field];
-      }
-      return values;
-    }, {});
+    const fields = ["name","number","emailId","enrollmentNumber","college","branch","semester","gender","technology","startDate","endDate"];
+    const updates = {};
+    fields.forEach(f => { if (req.body[f] !== undefined) updates[f] = req.body[f]; });
 
-    if (Object.keys(updates).length === 0) {
-      return res.status(400).json({ success: false, message: 'No editable application details provided' });
+    if (usesMongo()) {
+      const App = getModel();
+      const app = await App.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true });
+      if (!app) return res.status(404).json({ success: false, message: "Not found" });
+      return res.json({ success: true, message: "Updated", data: app });
     }
-
-    const application = await Application.findById(req.params.id);
-    if (!application) {
-      return res.status(404).json({ success: false, message: 'Application not found' });
-    }
-
-    if (updates.enrollmentNumber && updates.enrollmentNumber !== application.enrollmentNumber) {
-      const duplicate = await Application.findOne({
-        enrollmentNumber: updates.enrollmentNumber,
-        _id: { $ne: application._id }
-      });
-
-      if (duplicate) {
-        return res.status(400).json({
-          success: false,
-          message: 'An application with this enrollment number already exists.'
-        });
-      }
-    }
-
-    Object.assign(application, updates);
-
-    if (application.startDate >= application.endDate) {
-      return res.status(400).json({ success: false, message: 'End date must be after start date' });
-    }
-
-    await application.save();
-
-    res.json({
-      success: true,
-      message: 'Application details updated',
-      data: application
-    });
+    const app = jsonDb.update(req.params.id, updates);
+    if (!app) return res.status(404).json({ success: false, message: "Not found" });
+    res.json({ success: true, message: "Updated", data: app });
   } catch (error) {
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map(e => e.message);
-      return res.status(400).json({ success: false, message: messages.join(', ') });
-    }
-
-    if (error.code === 11000 && error.keyPattern?.enrollmentNumber) {
-      return res.status(400).json({
-        success: false,
-        message: 'An application with this enrollment number already exists.'
-      });
-    }
-
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
-// Update application status (approve/reject)
+// Update status
 const updateStatus = async (req, res) => {
   try {
     const { status, adminNote, offerLetterDate } = req.body;
+    if (!["approved","rejected","pending"].includes(status)) return res.status(400).json({ success: false, message: "Invalid status" });
+    if (status === "approved" && !offerLetterDate) return res.status(400).json({ success: false, message: "Offer letter date required" });
 
-    if (!['approved', 'rejected', 'pending'].includes(status)) {
-      return res.status(400).json({ success: false, message: 'Invalid status' });
+    const updates = {
+      status,
+      adminNote: status === "rejected" ? adminNote || "" : "",
+      ...(status === "approved" && { offerLetterDate, approvedAt: new Date() }),
+      ...(status === "rejected" && { rejectedAt: new Date() }),
+    };
+
+    if (usesMongo()) {
+      const App = getModel();
+      const app = await App.findByIdAndUpdate(req.params.id, updates, { new: true });
+      if (!app) return res.status(404).json({ success: false, message: "Not found" });
+      return res.json({ success: true, message: `Application ${status}`, data: app });
     }
-
-    const application = await Application.findById(req.params.id);
-
-    if (!application) {
-      return res.status(404).json({ success: false, message: 'Application not found' });
-    }
-
-    application.status = status;
-    application.adminNote = status === 'rejected' ? adminNote || '' : '';
-
-    if (status === 'approved') {
-      if (Object.prototype.hasOwnProperty.call(req.body, 'offerLetterDate')) {
-        if (!offerLetterDate) {
-          return res.status(400).json({ success: false, message: 'Offer letter date is required for approval' });
-        }
-        application.offerLetterDate = offerLetterDate;
-      } else if (!application.offerLetterDate) {
-        application.offerLetterDate = new Date();
-      }
-    }
-
-    await application.save();
-
-    res.json({
-      success: true,
-      message: `Application ${status} successfully`,
-      data: application
-    });
+    const app = jsonDb.update(req.params.id, updates);
+    if (!app) return res.status(404).json({ success: false, message: "Not found" });
+    res.json({ success: true, message: `Application ${status}`, data: app });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
-// Delete application
+// Delete
 const deleteApplication = async (req, res) => {
   try {
-    await Application.findByIdAndDelete(req.params.id);
-    res.json({ success: true, message: 'Application deleted' });
+    if (usesMongo()) {
+      const App = getModel();
+      await App.findByIdAndDelete(req.params.id);
+      return res.json({ success: true, message: "Deleted" });
+    }
+    jsonDb.delete(req.params.id);
+    res.json({ success: true, message: "Deleted" });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 

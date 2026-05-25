@@ -3,6 +3,11 @@ import Badge from "../components/Badge";
 import store from "../store";
 import kevalonLogo from "../assets/kevalon-logo.png";
 import { whatsappLink, mailtoLink, msgApproved, msgRejected, msgCertApproved, emailApproved } from "../utils/notifications";
+import {
+  adminLogin as apiLogin, adminLogout, getAdminToken,
+  getAllApplications, updateStatus, updateApplication as apiUpdateApp,
+  deleteApplication as apiDeleteApp, checkBackendHealth,
+} from "../utils/api";
 
 const TABS = ["requests", "analytics"];
 
@@ -32,14 +37,75 @@ export default function AdminPanel({ onNavigate }) {
   const [rejectTarget, setRejectTarget] = useState(null);
   const [rejectReason, setRejectReason] = useState("");
 
-  const refresh = () => {
+  const [useBackend, setUseBackend] = useState(false);
+
+  const refresh = async () => {
+    if (useBackend) {
+      try {
+        const res = await getAllApplications({ limit: 200 });
+        if (res.success) {
+          // Map backend fields to frontend format
+          const mapped = res.data.map(d => ({
+            token: d.uniqueId,
+            letterId: d.uniqueId,
+            fullName: d.name,
+            email: d.emailId,
+            phone: d.number,
+            enrollmentNumber: d.enrollmentNumber,
+            collegeName: d.college,
+            branch: d.branch,
+            semester: d.semester,
+            gender: d.gender,
+            technology: d.technology,
+            startDate: d.startDate,
+            endDate: d.endDate,
+            offerLetterDate: d.offerLetterDate,
+            status: d.status,
+            rejectionReason: d.adminNote || "",
+            submittedAt: d.createdAt,
+            downloadCount: d.downloadCount || 0,
+            certStatus: d.certStatus || "not_requested",
+            _backendId: d._id,
+          }));
+          setRequests(mapped.reverse());
+          setAnalytics(res.stats ? {
+            total: res.stats.total, pending: res.stats.pending,
+            approved: res.stats.approved, rejected: res.stats.rejected,
+            certPending: 0, certApproved: 0,
+            topTech: [], topColleges: [], topBranches: [],
+          } : store.getAnalytics());
+          return;
+        }
+      } catch { /* fall through */ }
+    }
+    // Fallback to localStorage
     setRequests([...store.getAll()].reverse());
     setAnalytics(store.getAnalytics());
   };
 
-  const login = () => {
-    if (pwd === "admin123") { setAuthed(true); refresh(); }
-    else setPwdErr("Incorrect password. Please try again.");
+  const login = async () => {
+    // Try backend login first
+    try {
+      const backendUp = await checkBackendHealth();
+      if (backendUp) {
+        const res = await apiLogin(pwd === "admin123" ? "admin" : pwd, pwd);
+        if (res.success) {
+          setUseBackend(true);
+          setAuthed(true);
+          refresh();
+          return;
+        }
+      }
+    } catch { /* fall through */ }
+
+    // Fallback to hardcoded
+    if (pwd === "admin123") {
+      setUseBackend(false);
+      setAuthed(true);
+      refresh();
+    } else {
+      setPwdErr("Incorrect password. Please try again.");
+    }
   };
 
   // Open view modal
@@ -95,23 +161,43 @@ export default function AdminPanel({ onNavigate }) {
     setApproveStep(2);
     setOfferLetterDate(new Date().toISOString().split("T")[0]);
   };
-  const confirmApprove = () => {
+  const confirmApprove = async () => {
+    const rec = requests.find(r => r.token === approveTarget);
+    if (useBackend && rec?._backendId) {
+      try {
+        await updateStatus(rec._backendId, "approved", "", offerLetterDate);
+        refresh(); closeView(); return;
+      } catch { /* fall through */ }
+    }
     store.approve(approveTarget, offerLetterDate);
-    refresh();
-    closeView();
+    refresh(); closeView();
   };
 
   // Reject
   const openReject = (token) => { setRejectTarget(token); setRejectReason(""); };
-  const confirmReject = () => {
+  const confirmReject = async () => {
     if (!rejectReason.trim()) return;
+    const rec = requests.find(r => r.token === rejectTarget);
+    if (useBackend && rec?._backendId) {
+      try {
+        await updateStatus(rec._backendId, "rejected", rejectReason);
+        refresh(); closeView(); setRejectTarget(null); setRejectReason(""); return;
+      } catch { /* fall through */ }
+    }
     store.reject(rejectTarget, rejectReason);
     refresh(); closeView(); setRejectTarget(null); setRejectReason("");
   };
 
   // Delete
-  const deleteRecord = (token) => {
+  const deleteRecord = async (token) => {
     if (!window.confirm("Delete this application permanently?")) return;
+    const rec = requests.find(r => r.token === token);
+    if (useBackend && rec?._backendId) {
+      try {
+        await apiDeleteApp(rec._backendId);
+        refresh(); closeView(); return;
+      } catch { /* fall through */ }
+    }
     store.deleteRecord(token);
     refresh(); closeView();
   };

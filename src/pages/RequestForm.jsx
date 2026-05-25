@@ -5,6 +5,7 @@ import Popup from "../components/Popup";
 import store, { calcDuration } from "../store";
 import { SEMESTERS, TECHNOLOGIES, BRANCHES, TEMPLATES } from "../constants";
 import { whatsappLink, mailtoLink, msgSubmitted, emailSubmitted } from "../utils/notifications";
+import { submitApplication as apiSubmit, checkBackendHealth } from "../utils/api";
 
 export default function RequestForm({ onNavigate }) {
   const [form, setForm] = useState({
@@ -158,14 +159,33 @@ export default function RequestForm({ onNavigate }) {
       return;
     }
 
-    // Proceed with submission
     setShowDuplicateConfirm(false);
     setSubmitting(true);
-    await new Promise(r => setTimeout(r, 800));
+
     const technologyFinal = form.technology === "Other" ? form.otherTechnology : form.technology;
-    const token = store.add({ ...form, technology: technologyFinal });
-    setSubmitting(false);
-    setPopup(token);
+    const formData = { ...form, technology: technologyFinal };
+
+    try {
+      // Try backend first
+      const backendUp = await checkBackendHealth();
+      if (backendUp) {
+        const res = await apiSubmit(formData);
+        // Also save to localStorage for offline access
+        store.add({ ...formData, _backendId: res.data?.uniqueId });
+        setSubmitting(false);
+        setPopup(res.data?.uniqueId || res.uniqueId);
+      } else {
+        // Fallback to localStorage
+        const token = store.add(formData);
+        setSubmitting(false);
+        setPopup(token);
+      }
+    } catch (err) {
+      // Backend error — fallback to localStorage
+      const token = store.add(formData);
+      setSubmitting(false);
+      setPopup(token);
+    }
   };
 
   const bg = darkMode ? "#0f172a" : "#f8fafc";
