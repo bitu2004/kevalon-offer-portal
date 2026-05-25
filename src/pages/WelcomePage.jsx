@@ -251,37 +251,94 @@ export default function WelcomePage({ onNavigate }) {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer style={{ background: "#0a1a3c", padding: "32px 24px", textAlign: "center", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 12 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 7, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <img src={kevalonLogo} alt="Kevalon" style={{ width: 20, height: 20, objectFit: "contain" }} />
+      <footer style={{ background: "#0a1a3c", padding: "48px 24px 32px", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+        <div style={{ maxWidth: 960, margin: "0 auto" }}>
+          {/* Top row */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 32, marginBottom: 40 }}>
+
+            {/* Brand */}
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <img src={kevalonLogo} alt="Kevalon" style={{ width: 24, height: 24, objectFit: "contain" }} />
+                </div>
+                <span style={{ color: "#fff", fontWeight: 700, fontSize: 15 }}>Kevalon Technology</span>
+              </div>
+              <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 12, lineHeight: 1.7, margin: 0 }}>
+                Leading IT company in Ahmedabad delivering web, mobile & software solutions.
+              </p>
+              <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
+                {[
+                  { icon: "💼", url: "https://www.linkedin.com/company/kevalon-technology" },
+                  { icon: "📸", url: "https://www.instagram.com/kevalon_technology" },
+                  { icon: "🐦", url: "https://x.com/KevalonT" },
+                  { icon: "💬", url: "https://wa.link/a02fdn" },
+                ].map(s => (
+                  <a key={s.url} href={s.url} target="_blank" rel="noreferrer"
+                    style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, textDecoration: "none" }}>
+                    {s.icon}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <div style={{ color: "#fff", fontWeight: 700, fontSize: 13, marginBottom: 14, textTransform: "uppercase", letterSpacing: 1 }}>Contact</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {["+91 90810 12218", "+91 91040 12218", "+91 97252 47990"].map(p => (
+                  <a key={p} href={`tel:${p.replace(/\s/g,"")}`} style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, textDecoration: "none" }}
+                    onMouseEnter={e => { e.currentTarget.style.color = "#38bdf8"; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = "rgba(255,255,255,0.6)"; }}>
+                    📞 {p}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Email */}
+            <div>
+              <div style={{ color: "#fff", fontWeight: 700, fontSize: 13, marginBottom: 14, textTransform: "uppercase", letterSpacing: 1 }}>Email</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {["ceo@kevalontechnology.in", "hr@kevalontechnology.in", "career@kevalontechnology.in"].map(e => (
+                  <a key={e} href={`mailto:${e}`} style={{ color: "rgba(255,255,255,0.6)", fontSize: 12, textDecoration: "none", wordBreak: "break-all" }}
+                    onMouseEnter={ev => { ev.currentTarget.style.color = "#38bdf8"; }}
+                    onMouseLeave={ev => { ev.currentTarget.style.color = "rgba(255,255,255,0.6)"; }}>
+                    ✉️ {e}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Address & Hours */}
+            <div>
+              <div style={{ color: "#fff", fontWeight: 700, fontSize: 13, marginBottom: 14, textTransform: "uppercase", letterSpacing: 1 }}>Office</div>
+              <div style={{ color: "rgba(255,255,255,0.55)", fontSize: 12, lineHeight: 1.8 }}>
+                📍 913, Solaris Business Hub,<br />
+                Parshwanath Jain BRTS, Sola Road,<br />
+                Bhuyangdev, Ahmedabad, India
+              </div>
+              <div style={{ color: "rgba(255,255,255,0.45)", fontSize: 12, marginTop: 10 }}>
+                🕐 Mon – Sat : 10 AM – 7 PM
+              </div>
+              <button onClick={() => onNavigate("contact")} style={{ marginTop: 12, background: "transparent", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 8, padding: "6px 14px", color: "rgba(255,255,255,0.6)", fontSize: 12, cursor: "pointer" }}>
+                View Contact Page →
+              </button>
+            </div>
+
           </div>
-          <span style={{ color: "#fff", fontWeight: 600, fontSize: 14 }}>Kevalon Technology</span>
-        </div>
-        <div style={{ display: "flex", justifyContent: "center", gap: 20, marginBottom: 12, flexWrap: "wrap" }}>
-          {[
-            { label: "📞 +91 90810 12218", href: "tel:+919081012218" },
-            { label: "✉️ ceo@kevalontechnology.in", href: "mailto:ceo@kevalontechnology.in" },
-            { label: "🌐 kevalontechnology.in", href: "https://www.kevalontechnology.in" },
-          ].map(l => (
-            <a key={l.label} href={l.href} target="_blank" rel="noreferrer"
-              style={{ color: "rgba(255,255,255,0.55)", fontSize: 12, textDecoration: "none" }}
-              onMouseEnter={e => { e.currentTarget.style.color = "#38bdf8"; }}
-              onMouseLeave={e => { e.currentTarget.style.color = "rgba(255,255,255,0.55)"; }}
-            >
-              {l.label}
+
+          {/* Bottom row */}
+          <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 20, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+            <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, margin: 0 }}>
+              © 2026 Kevalon Technology. All rights reserved.
+            </p>
+            <a href="https://www.kevalontechnology.in" target="_blank" rel="noreferrer"
+              style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, textDecoration: "none" }}>
+              www.kevalontechnology.in
             </a>
-          ))}
+          </div>
         </div>
-        <button
-          onClick={() => onNavigate("contact")}
-          style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 8, padding: "6px 18px", color: "rgba(255,255,255,0.5)", fontSize: 12, cursor: "pointer", marginBottom: 12 }}
-        >
-          Contact Us
-        </button>
-        <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, margin: 0 }}>
-          © 2026 Kevalon Technology. All rights reserved.
-        </p>
       </footer>
     </div>
   );
