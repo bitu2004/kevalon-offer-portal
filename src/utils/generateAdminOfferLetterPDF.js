@@ -122,14 +122,5 @@ export async function generateAdminOfferLetterPDF(data) {
   doc.setFont("helvetica", "bold");
   doc.text("HR Department", ML, y);
 
-  // ── Footer: italic note ───────────────────────────────────────────────────
-  doc.setFont("helvetica", "italic");
-  doc.setFontSize(8);
-  doc.setTextColor(120, 120, 120);
-  doc.text(
-    "This is a computer-generated offer letter issued by Kevalon Technology.",
-    W / 2, H - 18, { align: "center" }
-  );
-
   doc.save(`AdminOfferLetter_${data.token}.pdf`);
 }

@@ -5,12 +5,11 @@ export default function Navbar({ page, onNavigate }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const links = [
-    { label: "Home",         key: "home" },
-    { label: "Apply",        key: "request" },
-    { label: "Track Status", key: "track" },
-    { label: "Download",     key: "download" },
-    { label: "Verify",       key: "verify" },
-    { label: "Contact",      key: "contact" },
+    { label: "Home",             key: "home" },
+    { label: "Apply",            key: "request" },
+    { label: "Track & Download", key: "track" },
+    { label: "Verify",           key: "verify" },
+    { label: "Contact",          key: "contact" },
   ];
 
   const active = {

@@ -133,16 +133,16 @@ export default function WelcomePage({ onNavigate }) {
               shadow: "rgba(26,86,219,0.3)",
             },
             {
-              icon: "🔍", title: "Track Your Status",
-              desc: "Enter your token to check if your request is pending, approved, or rejected.",
+              icon: "🔍", title: "Track & Download",
+              desc: "Enter your token to check status, edit details, and download your offer letter.",
               action: "track", grad: "linear-gradient(135deg,#0891b2,#06b6d4)",
               shadow: "rgba(8,145,178,0.3)",
             },
             {
-              icon: "⬇️", title: "Download Letter",
-              desc: "Approved? Download your professional internship offer letter PDF.",
-              action: "download", grad: "linear-gradient(135deg,#0d9e6e,#10b981)",
-              shadow: "rgba(16,185,129,0.3)",
+              icon: "🛡️", title: "Verify Letter",
+              desc: "Verify the authenticity of any Kevalon offer letter by token.",
+              action: "verify", grad: "linear-gradient(135deg,#7c3aed,#a855f7)",
+              shadow: "rgba(124,58,237,0.3)",
             },
           ].map(card => (
             <button

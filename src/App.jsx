@@ -2,15 +2,13 @@ import { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
 import WelcomePage from "./pages/WelcomePage";
 import RequestForm from "./pages/RequestForm";
-import DownloadSection from "./pages/DownloadSection";
-import TrackStatus from "./pages/TrackStatus";
+import TrackDownload from "./pages/TrackDownload";
 import AdminPanel from "./pages/AdminPanel";
 import VerifyPage from "./pages/VerifyPage";
 import ContactPage from "./pages/ContactPage";
 
 export default function App() {
   const [page, setPage] = useState(() => {
-    // Auto-open verify page if URL has ?verify= param
     const params = new URLSearchParams(window.location.search);
     if (params.get("verify")) return "verify";
     return "home";
@@ -20,7 +18,6 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [page]);
 
-  // Admin panel gets full screen (no navbar)
   if (page === "admin") return <AdminPanel onNavigate={setPage} />;
 
   return (
@@ -29,8 +26,7 @@ export default function App() {
       <div style={{ flex: 1 }}>
         {page === "home"     && <WelcomePage onNavigate={setPage} />}
         {page === "request"  && <RequestForm onNavigate={setPage} />}
-        {page === "track"    && <TrackStatus onNavigate={setPage} />}
-        {page === "download" && <DownloadSection onNavigate={setPage} />}
+        {(page === "track" || page === "download") && <TrackDownload onNavigate={setPage} />}
         {page === "verify"   && <VerifyPage />}
         {page === "contact"  && <ContactPage />}
       </div>
