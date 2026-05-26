@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import WelcomePage from "./pages/WelcomePage";
 import RequestForm from "./pages/RequestForm";
 import TrackDownload from "./pages/TrackDownload";
@@ -30,6 +31,7 @@ export default function App() {
         {page === "verify"   && <VerifyPage />}
         {page === "contact"  && <ContactPage />}
       </div>
+      <Footer />
     </div>
   );
 }
