@@ -249,7 +249,7 @@ export default function RequestForm({ onNavigate }) {
 
           {/* Personal */}
           <div style={{ display: "flex", alignItems: "center", marginBottom: 24 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}></div>
+            <div style={{ height: 36, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}></div>
             <div>
               <div style={{ fontWeight: 700, fontSize: 16, color: text }}>Personal Information</div>
               <div style={{ fontSize: 12, color: sub }}>All fields marked * are required</div>
@@ -273,7 +273,7 @@ export default function RequestForm({ onNavigate }) {
 
           {/* Academic */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}></div>
+            <div style={{ height: 36, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}></div>
             <div>
               <div style={{ fontWeight: 700, fontSize: 16, color: text }}>Academic Details</div>
               <div style={{ fontSize: 12, color: sub }}>Your college and course information</div>
@@ -309,7 +309,7 @@ export default function RequestForm({ onNavigate }) {
 
           {/* Dates */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}></div>
+            <div style={{ height: 36, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}></div>
             <div>
               <div style={{ fontWeight: 700, fontSize: 16, color: text }}>Internship Duration</div>
               <div style={{ fontSize: 12, color: sub }}>Start and end dates of your internship</div>
