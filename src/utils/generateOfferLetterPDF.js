@@ -197,7 +197,7 @@ export async function generateOfferLetterPDF(data) {
 
   const typeLabel = {
     internship: "Internship", training: "Training",
-    project: "Project-Based Internship", industrial_training: "Industrial Training",
+    project: "Project-Based Internship", internship_training: "Internship + Training",
   }[data.template] || "Internship";
 
   doc.setFont("helvetica", "bold");

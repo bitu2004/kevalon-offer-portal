@@ -45,7 +45,7 @@ export async function generateAdminOfferLetterPDF(data) {
     internship:          "Internship",
     training:            "Training",
     project:             "Project-Based Internship",
-    industrial_training: "Industrial Training",
+    internship_training: "Internship + Training",
   }[data.template] || "Internship";
 
   doc.setFont("helvetica", "bold");

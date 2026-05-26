@@ -16,12 +16,12 @@ export const TEMPLATES = [
   { value: "internship",          label: "Internship",          icon: "💼" },
   { value: "training",            label: "Training",            icon: "📚" },
   { value: "project",             label: "Project-Based",       icon: "🛠️" },
-  { value: "industrial_training", label: "Industrial Training", icon: "🏭" },
+  { value: "internship_training", label: "Internship + Training", icon: "🎓" },
 ];
 
 export const TEMPLATE_TITLES = {
   internship:          "INTERNSHIP OFFER LETTER",
   training:            "TRAINING OFFER LETTER",
   project:             "PROJECT-BASED OFFER LETTER",
-  industrial_training: "INDUSTRIAL TRAINING OFFER LETTER",
+  internship_training: "INTERNSHIP + TRAINING OFFER LETTER",
 };
