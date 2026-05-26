@@ -238,13 +238,13 @@ export default function AdminPanel({ onNavigate }) {
 
   const filtered = filter === "all" ? requests
     : filter === "cert_pending" ? requests.filter(r => r.certStatus === "pending")
-    : requests.filter(r => r.status === filter);
+      : requests.filter(r => r.status === filter);
 
   const counts = {
-    all:          requests.length,
-    pending:      requests.filter(r => r.status === "pending").length,
-    approved:     requests.filter(r => r.status === "approved").length,
-    rejected:     requests.filter(r => r.status === "rejected").length,
+    all: requests.length,
+    pending: requests.filter(r => r.status === "pending").length,
+    approved: requests.filter(r => r.status === "approved").length,
+    rejected: requests.filter(r => r.status === "rejected").length,
     cert_pending: requests.filter(r => r.certStatus === "pending").length,
   };
 
@@ -256,7 +256,7 @@ export default function AdminPanel({ onNavigate }) {
 
   if (!authed) return (
     <div style={{ minHeight: "100vh", background: "linear-gradient(135deg,#0a1a3c,#0d2d6b)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-      <div style={{ background: "#fff", borderRadius: 24, padding: "48px 40px", maxWidth: 400, width: "100%", boxShadow: "0 24px 80px rgba(0,0,0,0.3)" }}>
+      <div className="admin-login-card" style={{ background: "#fff", borderRadius: 24, padding: "48px 40px", maxWidth: 400, width: "100%", boxShadow: "0 24px 80px rgba(0,0,0,0.3)" }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div style={{ width: 64, height: 64, borderRadius: 18, background: "linear-gradient(135deg,#1a56db,#0ea5e9)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", boxShadow: "0 8px 24px rgba(26,86,219,0.35)" }}>
             <img src={kevalonLogo} alt="Kevalon" style={{ width: 44, height: 44, objectFit: "contain" }} />
@@ -287,7 +287,7 @@ export default function AdminPanel({ onNavigate }) {
   return (
     <div style={{ minHeight: "100vh", background: bg, paddingBottom: 60 }}>
       {/* Header */}
-      <div style={{ background: "linear-gradient(135deg,#0a1a3c,#0d2d6b)", padding: "20px 32px" }}>
+      <div className="admin-header" style={{ background: "linear-gradient(135deg,#0a1a3c,#0d2d6b)", padding: "20px 32px" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
           <div>
             <h1 style={{ color: "#fff", fontSize: 20, fontWeight: 800, margin: "0 0 2px" }}>Admin Panel</h1>
@@ -315,19 +315,19 @@ export default function AdminPanel({ onNavigate }) {
         </div>
       </div>
 
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 24px" }}>
+      <div className="admin-content" style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 24px" }}>
 
         {tab === "analytics" && analytics && (
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             {/* Summary cards */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px,1fr))", gap: 16 }} className="admin-stats-grid">
               {[
-                { label: "Total",         val: analytics.total,        color: "#1a56db", icon: "📋" },
-                { label: "Pending",       val: analytics.pending,      color: "#b45309", icon: "⏳" },
-                { label: "Approved",      val: analytics.approved,     color: "#065f46", icon: "✅" },
-                { label: "Rejected",      val: analytics.rejected,     color: "#991b1b", icon: "❌" },
-                { label: "Cert Pending",  val: analytics.certPending,  color: "#7c3aed", icon: "🎓" },
-                { label: "Cert Issued",   val: analytics.certApproved, color: "#0891b2", icon: "🏆" },
+                { label: "Total", val: analytics.total, color: "#1a56db", icon: "📋" },
+                { label: "Pending", val: analytics.pending, color: "#b45309", icon: "⏳" },
+                { label: "Approved", val: analytics.approved, color: "#065f46", icon: "✅" },
+                { label: "Rejected", val: analytics.rejected, color: "#991b1b", icon: "❌" },
+                { label: "Cert Pending", val: analytics.certPending, color: "#7c3aed", icon: "🎓" },
+                { label: "Cert Issued", val: analytics.certApproved, color: "#0891b2", icon: "🏆" },
               ].map(s => (
                 <div key={s.label} style={{ background: card, borderRadius: 14, padding: "20px", border: `1px solid ${border}`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
                   <div style={{ fontSize: 22, marginBottom: 8 }}>{s.icon}</div>
@@ -353,7 +353,7 @@ export default function AdminPanel({ onNavigate }) {
               </div>
             )}
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
+            <div className="admin-analytics-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
               {[
                 { title: "Top Technologies", data: analytics.topTech, icon: "💻" },
                 { title: "Top Colleges", data: analytics.topColleges, icon: "🎓" },
@@ -381,10 +381,10 @@ export default function AdminPanel({ onNavigate }) {
         {tab === "requests" && (
           <>
             {/* Stats */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 20 }}>
+            <div className="admin-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 20 }}>
               {[
-                { label: "Total",    key: "all",      color: "#1a56db", icon: "📋" },
-                { label: "Pending",  key: "pending",  color: "#b45309", icon: "⏳" },
+                { label: "Total", key: "all", color: "#1a56db", icon: "📋" },
+                { label: "Pending", key: "pending", color: "#b45309", icon: "⏳" },
                 { label: "Approved", key: "approved", color: "#065f46", icon: "✅" },
                 { label: "Rejected", key: "rejected", color: "#991b1b", icon: "❌" },
               ].map(s => (
@@ -397,13 +397,13 @@ export default function AdminPanel({ onNavigate }) {
             </div>
 
             {/* Filter + bulk */}
-            <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
+            <div className="admin-filter-row" style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
               {["all", "pending", "approved", "rejected", "cert_pending"].map(f => (
                 <button key={f} onClick={() => setFilter(f)} style={{ padding: "7px 18px", borderRadius: 20, background: filter === f ? "linear-gradient(135deg,#1a56db,#0ea5e9)" : card, color: filter === f ? "#fff" : sub, fontSize: 13, fontWeight: filter === f ? 700 : 500, cursor: "pointer", textTransform: "capitalize", border: filter === f ? "none" : `1px solid ${border}`, boxShadow: filter === f ? "0 4px 12px rgba(26,86,219,0.3)" : "none" }}>
                   {f === "cert_pending" ? `🎓 Cert Review (${counts.cert_pending})` : `${f} (${counts[f]})`}
                 </button>
               ))}
-              <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }}>
+              <div className="admin-bulk-row" style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }}>
                 {selectedTokens.length > 0 && (
                   <>
                     <span style={{ fontSize: 12, color: sub }}>{selectedTokens.length} selected</span>
@@ -434,11 +434,9 @@ export default function AdminPanel({ onNavigate }) {
                 onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 6px 24px rgba(0,0,0,0.08)"; }}
                 onMouseLeave={e => { e.currentTarget.style.boxShadow = "0 2px 10px rgba(0,0,0,0.04)"; }}
               >
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
+                <div className="admin-req-row" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    {req.status === "pending" && (
-                      <input type="checkbox" checked={selectedTokens.includes(req.token)} onChange={() => toggleSelect(req.token)} style={{ width: 16, height: 16, accentColor: "#1a56db", cursor: "pointer" }} />
-                    )}
+                    {req.status === "pending"}
                     <div style={{ width: 42, height: 42, borderRadius: 11, background: "linear-gradient(135deg,#eff6ff,#dbeafe)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}></div>
                     <div>
                       <div style={{ fontWeight: 700, fontSize: 14, color: text }}>{req.fullName}</div>
@@ -450,7 +448,7 @@ export default function AdminPanel({ onNavigate }) {
                       </div>
                     </div>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div className="admin-req-actions" style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <span style={{ fontSize: 11, color: sub }}>{fmtDate(req.submittedAt)}</span>
                     <button
                       onClick={() => openView(req)}
@@ -469,7 +467,7 @@ export default function AdminPanel({ onNavigate }) {
       {/* ── VIEW / APPROVE MODAL ── */}
       {viewRecord && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16 }}>
-          <div style={{ background: "#fff", borderRadius: 20, width: "100%", maxWidth: 520, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 24px 80px rgba(0,0,0,0.25)" }}>
+          <div className="admin-modal" style={{ background: "#fff", borderRadius: 20, width: "100%", maxWidth: 520, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 24px 80px rgba(0,0,0,0.25)" }}>
 
             {/* Modal header */}
             <div style={{ padding: "20px 24px 16px", borderBottom: "1px solid #e2e8f0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -496,22 +494,22 @@ export default function AdminPanel({ onNavigate }) {
             </div>
 
             {/* Details / Edit form */}
-            <div style={{ padding: "20px 24px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 24px" }}>
+            <div className="admin-modal-grid" style={{ padding: "20px 24px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 24px" }}>
               {editMode ? (
                 // Edit form
                 <>
                   {[
-                    ["fullName",        "Full Name",       "text"],
-                    ["phone",           "Phone",           "text"],
-                    ["email",           "Email",           "email"],
-                    ["enrollmentNumber","Enrollment No.",  "text"],
-                    ["collegeName",     "College",         "text"],
-                    ["branch",          "Branch",          "text"],
-                    ["semester",        "Semester",        "text"],
-                    ["gender",          "Gender",          "text"],
-                    ["technology",      "Technology",      "text"],
-                    ["startDate",       "Start Date",      "date"],
-                    ["endDate",         "End Date",        "date"],
+                    ["fullName", "Full Name", "text"],
+                    ["phone", "Phone", "text"],
+                    ["email", "Email", "email"],
+                    ["enrollmentNumber", "Enrollment No.", "text"],
+                    ["collegeName", "College", "text"],
+                    ["branch", "Branch", "text"],
+                    ["semester", "Semester", "text"],
+                    ["gender", "Gender", "text"],
+                    ["technology", "Technology", "text"],
+                    ["startDate", "Start Date", "date"],
+                    ["endDate", "End Date", "date"],
                   ].map(([key, label, type]) => (
                     <div key={key}>
                       <div style={{ fontSize: 10, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.8, fontWeight: 600, marginBottom: 4 }}>{label}</div>
@@ -541,18 +539,18 @@ export default function AdminPanel({ onNavigate }) {
                 // View mode
                 <>
                   {[
-                    ["Full Name",      viewRecord.fullName],
-                    ["Unique ID",      viewRecord.letterId],
-                    ["Phone",          viewRecord.phone],
-                    ["Email",          viewRecord.email],
+                    ["Full Name", viewRecord.fullName],
+                    ["Unique ID", viewRecord.letterId],
+                    ["Phone", viewRecord.phone],
+                    ["Email", viewRecord.email],
                     ["Enrollment No.", viewRecord.enrollmentNumber],
-                    ["College",        viewRecord.collegeName],
-                    ["Branch",         viewRecord.branch],
-                    ["Semester",       viewRecord.semester],
-                    ["Gender",         viewRecord.gender],
-                    ["Technology",     viewRecord.technology],
-                    ["Start Date",     fmtDate(viewRecord.startDate)],
-                    ["End Date",       fmtDate(viewRecord.endDate)],
+                    ["College", viewRecord.collegeName],
+                    ["Branch", viewRecord.branch],
+                    ["Semester", viewRecord.semester],
+                    ["Gender", viewRecord.gender],
+                    ["Technology", viewRecord.technology],
+                    ["Start Date", fmtDate(viewRecord.startDate)],
+                    ["End Date", fmtDate(viewRecord.endDate)],
                   ].map(([k, v]) => (
                     <div key={k}>
                       <div style={{ fontSize: 10, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.8, fontWeight: 600, marginBottom: 3 }}>{k}</div>
@@ -582,37 +580,37 @@ export default function AdminPanel({ onNavigate }) {
                     </div>
                   )}
 
-            {/* Duplicate warning for admin */}
-            {(() => {
-              const dupes = store.findDuplicates(viewRecord.email, viewRecord.enrollmentNumber, viewRecord.token);
-              if (!dupes.length) return null;
-              return (
-                <div style={{ gridColumn: "1 / -1", background: "#fee2e2", border: "1px solid #fca5a5", borderRadius: 10, padding: "12px 16px" }}>
-                  <div style={{ fontWeight: 700, fontSize: 12, color: "#991b1b", marginBottom: 6, display: "flex", alignItems: "center", gap: 6 }}>
-                    🔴 Duplicate Applications Found ({dupes.length})
-                  </div>
-                  {dupes.map(d => (
-                    <div key={d.token} style={{ fontSize: 11, color: "#b91c1c", marginBottom: 3 }}>
-                      • <strong>{d.fullName}</strong> · {d.email} · <span style={{ fontFamily: "monospace" }}>{d.token}</span> · Status: <strong style={{ textTransform: "capitalize" }}>{d.status}</strong>
-                    </div>
-                  ))}
-                </div>
-              );
-            })()}
+                  {/* Duplicate warning for admin */}
+                  {(() => {
+                    const dupes = store.findDuplicates(viewRecord.email, viewRecord.enrollmentNumber, viewRecord.token);
+                    if (!dupes.length) return null;
+                    return (
+                      <div style={{ gridColumn: "1 / -1", background: "#fee2e2", border: "1px solid #fca5a5", borderRadius: 10, padding: "12px 16px" }}>
+                        <div style={{ fontWeight: 700, fontSize: 12, color: "#991b1b", marginBottom: 6, display: "flex", alignItems: "center", gap: 6 }}>
+                          🔴 Duplicate Applications Found ({dupes.length})
+                        </div>
+                        {dupes.map(d => (
+                          <div key={d.token} style={{ fontSize: 11, color: "#b91c1c", marginBottom: 3 }}>
+                            • <strong>{d.fullName}</strong> · {d.email} · <span style={{ fontFamily: "monospace" }}>{d.token}</span> · Status: <strong style={{ textTransform: "capitalize" }}>{d.status}</strong>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
 
-              {/* Status */}
-              <div style={{ gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                <span style={{ fontSize: 13, color: "#64748b" }}>Current Status:</span>
-                <Badge status={viewRecord.status} />
-                {viewRecord.status === "approved" && (
-                  <span style={{ fontSize: 11, background: "#d1fae5", color: "#065f46", borderRadius: 6, padding: "3px 8px", fontWeight: 600, border: "1px solid #6ee7b7" }}>
-                    🔒 Details Locked
-                  </span>
-                )}
-                {viewRecord.certStatus && viewRecord.certStatus !== "not_requested" && (
-                  <span style={{ fontSize: 11, background: "#ede9fe", color: "#7c3aed", borderRadius: 6, padding: "3px 8px", fontWeight: 700 }}>🎓 Cert: {viewRecord.certStatus}</span>
-                )}
-              </div>
+                  {/* Status */}
+                  <div style={{ gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                    <span style={{ fontSize: 13, color: "#64748b" }}>Current Status:</span>
+                    <Badge status={viewRecord.status} />
+                    {viewRecord.status === "approved" && (
+                      <span style={{ fontSize: 11, background: "#d1fae5", color: "#065f46", borderRadius: 6, padding: "3px 8px", fontWeight: 600, border: "1px solid #6ee7b7" }}>
+                        🔒 Details Locked
+                      </span>
+                    )}
+                    {viewRecord.certStatus && viewRecord.certStatus !== "not_requested" && (
+                      <span style={{ fontSize: 11, background: "#ede9fe", color: "#7c3aed", borderRadius: 6, padding: "3px 8px", fontWeight: 700 }}>🎓 Cert: {viewRecord.certStatus}</span>
+                    )}
+                  </div>
                 </>
               )}
             </div>
@@ -649,7 +647,7 @@ export default function AdminPanel({ onNavigate }) {
             )}
 
             {/* Action buttons */}
-            <div style={{ padding: "16px 24px 24px", borderTop: "1px solid #e2e8f0", display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <div className="admin-modal-actions" style={{ padding: "16px 24px 24px", borderTop: "1px solid #e2e8f0", display: "flex", gap: 10, flexWrap: "wrap" }}>
               {editMode ? (
                 <>
                   <button onClick={() => setEditMode(false)} style={{ flex: 1, padding: "12px", borderRadius: 10, border: "1px solid #e2e8f0", background: "#f8fafc", color: "#64748b", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Cancel</button>
@@ -724,7 +722,7 @@ export default function AdminPanel({ onNavigate }) {
 
       {rejectTarget && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 20 }}>
-          <div style={{ background: "#fff", borderRadius: 20, padding: "32px 28px", maxWidth: 440, width: "100%", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
+          <div className="admin-modal" style={{ background: "#fff", borderRadius: 20, padding: "32px 28px", maxWidth: 440, width: "100%", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
             <h3 style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 800, color: "#0f172a" }}>
               {rejectTarget.startsWith("cert:") ? "Reject Certificate Request" : "Reject Application"}
             </h3>

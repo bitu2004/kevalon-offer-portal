@@ -83,8 +83,58 @@
         .popup-token { font-size: 20px !important; letter-spacing: 2px !important; }
       }
 
+      /* ── Welcome Page Hero Stats responsive ── */
+      .hero-stats-row {
+        display: flex !important;
+        gap: 40px !important;
+        justify-content: center !important;
+        flex-wrap: nowrap !important;
+      }
+      .hero-stat-item {
+        text-align: center;
+      }
+      .hero-stat-val {
+        color: #38bdf8;
+        font-size: 28px;
+        font-weight: 800;
+        transition: font-size 0.2s;
+      }
+      .hero-stat-label {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 13px;
+        margin-top: 4px;
+        transition: font-size 0.2s;
+      }
+      @media (max-width: 600px) {
+        .hero-stats-row {
+          gap: 16px !important;
+          margin-top: 40px !important;
+        }
+        .hero-stat-val {
+          font-size: 20px !important;
+        }
+        .hero-stat-label {
+          font-size: 10px !important;
+          margin-top: 2px !important;
+        }
+      }
+      @media (max-width: 360px) {
+        .hero-stats-row {
+          gap: 10px !important;
+        }
+        .hero-stat-val {
+          font-size: 17px !important;
+        }
+        .hero-stat-label {
+          font-size: 9px !important;
+        }
+      }
+
       /* ── Admin Panel responsive ── */
       @media (max-width: 600px) {
+        .admin-header { padding: 16px 16px !important; }
+        .admin-content { padding: 16px 12px !important; }
+        .admin-login-card { padding: 32px 20px !important; border-radius: 18px !important; }
         .admin-stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
         .admin-analytics-grid { grid-template-columns: 1fr !important; }
         .admin-filter-row { flex-wrap: wrap !important; gap: 6px !important; }
@@ -92,7 +142,14 @@
         .admin-header-btns { flex-wrap: wrap !important; gap: 6px !important; }
         .admin-header-btns button { font-size: 11px !important; padding: 6px 10px !important; }
         .admin-tabs button { font-size: 12px !important; padding: 7px 12px !important; }
-        .admin-bulk-row { flex-direction: column !important; align-items: flex-start !important; }
+        .admin-bulk-row {
+          flex-direction: column !important;
+          align-items: flex-start !important;
+          margin-left: 0 !important;
+          width: 100% !important;
+          margin-top: 10px !important;
+          gap: 6px !important;
+        }
         .admin-modal { padding: 20px 16px !important; }
         .admin-modal-grid { grid-template-columns: 1fr !important; }
         .admin-modal-actions { flex-wrap: wrap !important; }

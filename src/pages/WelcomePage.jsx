@@ -111,11 +111,11 @@ export default function WelcomePage({ onNavigate }) {
           </div>
 
           {/* Stats row */}
-          <div className="fade-up" style={{ display: "flex", gap: 40, justifyContent: "center", marginTop: 64, flexWrap: "wrap", animationDelay: "0.4s" }}>
+          <div className="fade-up hero-stats-row" style={{ marginTop: 64, animationDelay: "0.4s" }}>
             {[["500+", "Applications"], ["100%", "Online Process"], ["24h", "Avg. Review Time"]].map(([val, label]) => (
-              <div key={label} style={{ textAlign: "center" }}>
-                <div style={{ color: "#38bdf8", fontSize: 28, fontWeight: 800 }}>{val}</div>
-                <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, marginTop: 4 }}>{label}</div>
+              <div key={label} className="hero-stat-item">
+                <div className="hero-stat-val">{val}</div>
+                <div className="hero-stat-label">{label}</div>
               </div>
             ))}
           </div>

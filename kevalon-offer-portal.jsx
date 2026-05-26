@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 
-const SEMESTERS = ["1st","2nd","3rd","4th","5th","6th","7th","8th"];
-const TECHNOLOGIES = ["Web Development","Android Development","iOS Development","React / React Native","Node.js","Python","Java","Machine Learning / AI","Data Science","Cloud Computing","DevOps","Cybersecurity","UI/UX Design","Other"];
-const BRANCHES = ["Computer Science Engineering","Information Technology","Electronics & Communication","Electrical Engineering","Mechanical Engineering","Civil Engineering","Chemical Engineering","Biotechnology","Other"];
+const SEMESTERS = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"];
+const TECHNOLOGIES = ["Web Development", "Android Development", "iOS Development", "React / React Native", "Node.js", "Python", "Java", "Machine Learning / AI", "Data Science", "Cloud Computing", "DevOps", "Cybersecurity", "UI/UX Design", "Other"];
+const BRANCHES = ["Computer Science Engineering", "Information Technology", "Electronics & Communication", "Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Chemical Engineering", "Biotechnology", "Other"];
 
 function generateToken() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -31,7 +31,7 @@ async function generateOfferLetterPDF(data) {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
   const W = 210, H = 297;
-  const today = new Date().toLocaleDateString("en-IN", { day:"2-digit", month:"long", year:"numeric" });
+  const today = new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" });
 
   // Background
   doc.setFillColor(248, 250, 252);
@@ -54,13 +54,13 @@ async function generateOfferLetterPDF(data) {
   // Logo circle placeholder
   doc.setFillColor(0, 168, 204);
   doc.circle(20, 9, 6, "F");
-  doc.setTextColor(255,255,255);
+  doc.setTextColor(255, 255, 255);
   doc.setFontSize(8);
-  doc.setFont("helvetica","bold");
+  doc.setFont("helvetica", "bold");
   doc.text("KT", 20, 11, { align: "center" });
 
   // Title block
-  doc.setFillColor(255,255,255);
+  doc.setFillColor(255, 255, 255);
   doc.roundedRect(20, 28, W - 40, 22, 3, 3, "F");
   doc.setDrawColor(13, 74, 110);
   doc.setLineWidth(0.5);
@@ -112,8 +112,8 @@ async function generateOfferLetterPDF(data) {
     ["Branch", data.branch],
     ["Semester", data.semester],
     ["Technology", data.technology],
-    ["Start Date", new Date(data.startDate).toLocaleDateString("en-IN",{day:"2-digit",month:"long",year:"numeric"})],
-    ["End Date", new Date(data.endDate).toLocaleDateString("en-IN",{day:"2-digit",month:"long",year:"numeric"})],
+    ["Start Date", new Date(data.startDate).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })],
+    ["End Date", new Date(data.endDate).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })],
   ];
 
   details.forEach(([label, value], i) => {
@@ -197,8 +197,8 @@ function Select({ label, error, children, ...props }) {
 }
 
 function Badge({ status }) {
-  const map = { pending: ["#b45309","#fef3c7"], approved: ["#065f46","#d1fae5"], rejected: ["#991b1b","#fee2e2"] };
-  const [color, bg] = map[status] || ["#555","#eee"];
+  const map = { pending: ["#b45309", "#fef3c7"], approved: ["#065f46", "#d1fae5"], rejected: ["#991b1b", "#fee2e2"] };
+  const [color, bg] = map[status] || ["#555", "#eee"];
   return <span style={{ fontSize: 11, padding: "2px 10px", borderRadius: 20, background: bg, color, fontWeight: 600, textTransform: "capitalize" }}>{status}</span>;
 }
 
@@ -329,7 +329,7 @@ function RequestForm({ onBack }) {
 
       <div style={{ maxWidth: 640, margin: "32px auto", padding: "0 20px" }}>
         <div style={{ background: "var(--color-background-primary)", borderRadius: 16, padding: "32px 28px", border: "1px solid var(--color-border-tertiary)" }}>
-          <h2 style={{ margin: "0 0 8px", fontSize: 20, fontWeight: 600, fontFamily: "sans-serif" }}>Personal Information</h2>
+          <h2 style={{ margin: "0 0 8px", fontSize: 20, fontWeight: 600, fontFamily: "sans-serif" }}></h2>
           <p style={{ margin: "0 0 24px", fontSize: 13, color: "var(--color-text-secondary)", fontFamily: "sans-serif" }}>All fields marked are required. Token is generated after submission.</p>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
@@ -575,7 +575,7 @@ function AdminPanel({ onBack }) {
           <div style={{ color: "#fff", fontWeight: 700, fontSize: 18, fontFamily: "sans-serif" }}>Admin Panel</div>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
-          {["all","pending","approved","rejected"].map(f => (
+          {["all", "pending", "approved", "rejected"].map(f => (
             <button key={f} onClick={() => setFilter(f)} style={{ padding: "6px 14px", borderRadius: 20, border: "1px solid rgba(255,255,255,0.25)", background: filter === f ? "#fff" : "transparent", color: filter === f ? "#0d4a6e" : "#fff", fontSize: 12, cursor: "pointer", fontFamily: "sans-serif", textTransform: "capitalize", fontWeight: filter === f ? 600 : 400 }}>{f}</button>
           ))}
           <button onClick={refresh} style={{ padding: "6px 14px", borderRadius: 20, border: "1px solid rgba(255,255,255,0.25)", background: "transparent", color: "#fff", fontSize: 12, cursor: "pointer", fontFamily: "sans-serif" }}>↻ Refresh</button>
