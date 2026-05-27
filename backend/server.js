@@ -2,8 +2,11 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const path = require("path");
 
-dotenv.config();
+// Load backend/.env explicitly so running `node backend/server.js` from
+// the repository root picks up the correct variables.
+dotenv.config({ path: path.join(__dirname, ".env") });
 
 const app = express();
 

@@ -1,0 +1,48 @@
+{
+  "applications": [
+    {
+      "uniqueId": "KVL-H3VZS8JT",
+      "letterId": "KVLN-2026-00001",
+      "name": "Test User",
+      "number": "9876543210",
+      "emailId": "test@example.com",
+      "enrollmentNumber": "ENR12345",
+      "college": "Test College",
+      "branch": "CS",
+      "semester": "6",
+      "gender": "Other",
+      "technology": "React",
+      "startDate": "2026-06-01",
+      "endDate": "2026-06-30",
+      "status": "pending",
+      "adminNote": "",
+      "downloadCount": 0,
+      "certStatus": "not_requested",
+      "_id": "1779869895113",
+      "createdAt": "2026-05-27T08:18:15.113Z",
+      "updatedAt": "2026-05-27T08:18:15.113Z"
+    },
+    {
+      "uniqueId": "KVL-WRTV7TWU",
+      "letterId": "KVLN-2026-00002",
+      "name": "Test User 2",
+      "number": "9998887776",
+      "emailId": "two@example.com",
+      "enrollmentNumber": "ENR54321",
+      "college": "Test College",
+      "branch": "IT",
+      "semester": "4",
+      "gender": "Other",
+      "technology": "Vue",
+      "startDate": "2026-06-01",
+      "endDate": "2026-06-30",
+      "status": "pending",
+      "adminNote": "",
+      "downloadCount": 0,
+      "certStatus": "not_requested",
+      "_id": "1779870071833",
+      "createdAt": "2026-05-27T08:21:11.833Z",
+      "updatedAt": "2026-05-27T08:21:11.833Z"
+    }
+  ]
+}
